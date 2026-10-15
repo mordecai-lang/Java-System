@@ -1,0 +1,13 @@
+com\hostel\util\JsonUtil.class
+com\hostel\model\User.class
+com\hostel\service\AdminService.class
+com\hostel\handler\AuthenticationHandler.class
+com\hostel\util\FormDataParser.class
+com\hostel\handler\PageHandler.class
+com\hostel\dao\HostelsAndRoomsDAO.class
+com\hostel\util\JsonResponseUtil.class
+com\hostel\handler\Main.class
+com\hostel\service\AuthenticationService.class
+com\hostel\dao\AuthenticationDAO.class
+com\hostel\handler\AdminHandler.class
+com\hostel\util\ResponseUtil.class

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Users Activity</title>
+
+    <link rel="stylesheet" href="users.css" />
+  </head>
+
+  <body>
+    <div class="users-container">
+      <!-- Page Header -->
+      <header class="page-header">
+        <div>
+          <h1>Users Activity</h1>
+          <p>Manage registered users and administrators.</p>
+        </div>
+      </header>
+
+      <!-- Statistics -->
+      <section class="user-stats">
+        <div class="stat-card">
+          <span>Total Users</span>
+          <strong id="totalUsers">0</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Administrators</span>
+          <strong id="totalAdmins">0</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Regular Users</span>
+          <strong id="totalRegularUsers">0</strong>
+        </div>
+      </section>
+
+      <!-- Add + Remove -->
+      <section class="user-actions">
+        <!-- Add User -->
+        <div class="action-card">
+          <div class="section-header">
+            <h2>Add User / Admin</h2>
+            <p>Password should be entered by actual user.</p>
+          </div>
+
+          <form id="addUserForm">
+            <div class="form-group">
+              <label for="fullName"> Full Name </label>
+
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                placeholder="Enter full name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email"> Email </label>
+
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter email"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password"> Password </label>
+
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter password"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="role"> Account Role </label>
+
+              <select id="role" name="role">
+                <option value="USER">Regular User</option>
+
+                <option value="ADMIN">Administrator</option>
+              </select>
+            </div>
+
+            <button type="submit">Create Account</button>
+            <div id="messagePopup" class="message-popup"></div>
+          </form>
+        </div>
+
+        <!-- Remove User -->
+        <div class="action-card">
+          <div class="section-header">
+            <h2>Remove User / Admin</h2>
+            <p>Remove an existing system account.</p>
+          </div>
+
+          <form id="removeUserForm">
+            <div class="form-group">
+              <label for="removeUserEmail">User Email</label>
+
+              <input
+                type="email"
+                id="removeUserEmail"
+                name="removeUserEmail"
+                placeholder="Enter user's email"
+                required
+              />
+            </div>
+
+            <!-- Selected account -->
+            <div id="selectedUser" class="selected-user">
+              <span class="selected-user-label">Account to remove</span>
+              <strong id="selectedUserEmail">No account selected</strong>
+            </div>
+
+            <button type="submit" class="remove-btn">Remove Account</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Registered Users -->
+      <section class="users-section">
+        <div class="section-header table-header">
+          <div>
+            <h2>Registered Users</h2>
+            <p>View and manage system accounts.</p>
+          </div>
+
+          <input type="text" id="searchUser" placeholder="Search users..." />
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody id="usersTableBody">
+              <!-- JavaScript will insert users here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script src="users.js"></script>
+  </body>
+</html>

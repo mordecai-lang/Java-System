@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HostelBook | Room Management</title>
+
+    <!-- Reuse the existing site/sidebar styles. -->
+    <link rel="stylesheet" href="home.css" />
+    <!-- Reuse the shared page, form, card, table and button styles. -->
+    <link rel="stylesheet" href="hostel-main-content.css" />
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <div class="admin-layout">
+      <!-- ================= SIDEBAR (reused) ================= -->
+      <aside class="sidebar">
+        <button class="collapse-btn" id="collapseBtn" type="button">
+          <span class="menu-icon">☰</span>
+          <span class="menu-text">Menu</span>
+        </button>
+
+        <div class="logo-section">
+          <div class="logo-text">
+            <h1>HostelBook</h1>
+            <p>Administration Portal</p>
+          </div>
+        </div>
+
+        <nav class="navigation">
+          <a href="/admin" class="nav-item">
+            <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
+            <span>Dashboard</span>
+          </a>
+          <a href="/users" class="nav-item">
+            <span class="nav-icon"><i data-lucide="users"></i></span>
+            <span>Manage Users</span>
+          </a>
+          <a href="/hostels" class="nav-item">
+            <span class="nav-icon"><i data-lucide="building"></i></span>
+            <span>Add Hostels</span>
+          </a>
+          <a href="/rooms" class="nav-item">
+            <span class="nav-icon"><i data-lucide="bed-double"></i></span>
+            <span>Allocate Rooms</span>
+          </a>
+          <a href="#" class="nav-item">
+            <span class="nav-icon"><i data-lucide="calendar"></i></span>
+            <span>Manage Bookings</span>
+          </a>
+          <a href="#" class="nav-item">
+            <span class="nav-icon"><i data-lucide="credit-card"></i></span>
+            <span>View Payments</span>
+          </a>
+          <a href="/settings" class="nav-item">
+            <span class="nav-icon"><i data-lucide="settings"></i></span>
+            <span>Settings</span>
+          </a>
+        </nav>
+
+        <div class="help-card">
+          <div class="help-icon"><i data-lucide="phone"></i></div>
+          <h3>Need Help?</h3>
+          <p>Contact our support team 24/7</p>
+          <button type="button" id="supportBtn">Get Support</button>
+        </div>
+      </aside>
+
+      <!-- ================= MAIN CONTENT ================= -->
+      <main class="main-content">
+        <header class="page-header">
+          <div>
+            <p class="breadcrumb">Administration / Rooms</p>
+            <h2>Room Management</h2>
+            <p>
+              Create rooms under a hostel and track capacity, pricing and
+              availability.
+            </p>
+          </div>
+        </header>
+
+        <!-- Overview cards -->
+        <section class="room-summary-grid" aria-label="Room summary">
+          <article class="room-summary-card">
+            <div class="room-summary-icon"><i data-lucide="door-open"></i></div>
+            <div>
+              <p>Total rooms</p>
+              <strong id="totalRooms">3</strong>
+            </div>
+          </article>
+          <article class="room-summary-card">
+            <div class="room-summary-icon">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+            <div>
+              <p>Available rooms</p>
+              <strong id="availableRooms">2</strong>
+            </div>
+          </article>
+          <article class="room-summary-card">
+            <div class="room-summary-icon"><i data-lucide="users"></i></div>
+            <div>
+              <p>Total capacity (beds)</p>
+              <strong id="totalCapacity">8</strong>
+            </div>
+          </article>
+        </section>
+
+        <!-- Add / edit room form -->
+        <section class="content-card room-form-card" id="roomFormSection">
+          <div class="section-heading">
+            <div class="section-icon"><i data-lucide="bed-double"></i></div>
+            <div>
+              <h3 id="roomFormHeading">Add New Room</h3>
+              <p>Choose the hostel first, then enter the room details.</p>
+            </div>
+          </div>
+
+          <form id="roomForm">
+            <input type="hidden" id="roomId" />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="hostelName">Hostel <span>*</span></label>
+                <select id="hostelName" required>
+                  <option value="">Select a hostel</option>
+                  <option value="Sunrise Hostel">Sunrise Hostel</option>
+                  <option value="Green View Residence">
+                    Green View Residence
+                  </option>
+                  <option value="Hilltop Student Homes">
+                    Hilltop Student Homes
+                  </option>
+                </select>
+                <small>A room belongs to one hostel.</small>
+              </div>
+              <div class="form-group">
+                <label for="roomNumber"
+                  >Room number / name <span>*</span></label
+                >
+                <input
+                  id="roomNumber"
+                  type="text"
+                  placeholder="e.g. A-101"
+                  maxlength="30"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="roomType">Room type <span>*</span></label>
+                <select id="roomType" required>
+                  <option value="">Select room type</option>
+                  <option value="Single">Single</option>
+                  <option value="Double">Double</option>
+                  <option value="Shared">Shared / Dormitory</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="capacity">Bed capacity <span>*</span></label>
+                <input
+                  id="capacity"
+                  type="number"
+                  min="1"
+                  max="100"
+                  step="1"
+                  placeholder="e.g. 2"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="monthlyPrice"
+                  >Price per bed / month (KES) <span>*</span></label
+                >
+                <input
+                  id="monthlyPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 6500"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="roomStatus">Room status <span>*</span></label>
+                <select id="roomStatus" required>
+                  <option value="Available">Available</option>
+                  <option value="Occupied">Occupied</option>
+                  <option value="Maintenance">Maintenance</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="roomNotes">Notes (optional)</label>
+              <textarea
+                id="roomNotes"
+                rows="3"
+                placeholder="e.g. Ground floor, near shared kitchen..."
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="secondary-btn"
+                id="cancelRoomEditBtn"
+              >
+                Clear form
+              </button>
+              <button type="submit" class="primary-btn" id="saveRoomBtn">
+                <i data-lucide="plus"></i> Save Room
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Rooms table -->
+        <section class="content-card room-list-card">
+          <div class="list-header">
+            <div class="section-heading">
+              <div class="section-icon"><i data-lucide="list"></i></div>
+              <div>
+                <h3>Registered Rooms</h3>
+                <p>Review room details and update their status.</p>
+              </div>
+            </div>
+            <div class="list-controls">
+              <label class="search-box" for="roomSearch">
+                <i data-lucide="search"></i>
+                <input
+                  type="search"
+                  id="roomSearch"
+                  placeholder="Search rooms..."
+                  aria-label="Search rooms"
+                />
+              </label>
+              <select id="statusFilter" aria-label="Filter by status">
+                <option value="All">All statuses</option>
+                <option value="Available">Available</option>
+                <option value="Occupied">Occupied</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="hostel-table room-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Room</th>
+                  <th>Hostel</th>
+                  <th>Type</th>
+                  <th>Capacity</th>
+                  <th>Price / bed</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="roomsTableBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <p id="roomCountLabel">Showing 3 rooms</p>
+            <p>Prototype data only — connect this page to Java/JDBC later.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      // Frontend demonstration only. Replace this array with data returned by Java/JDBC.
+      let rooms = [
+        {
+          id: 1,
+          hostel: "Sunrise Hostel",
+          number: "A-101",
+          type: "Double",
+          capacity: 2,
+          price: 6500,
+          status: "Available",
+          notes: "",
+        },
+        {
+          id: 2,
+          hostel: "Sunrise Hostel",
+          number: "A-102",
+          type: "Shared",
+          capacity: 4,
+          price: 4500,
+          status: "Occupied",
+          notes: "",
+        },
+        {
+          id: 3,
+          hostel: "Green View Residence",
+          number: "B-201",
+          type: "Single",
+          capacity: 2,
+          price: 8000,
+          status: "Available",
+          notes: "",
+        },
+      ];
+      let nextRoomId = 4;
+      let toastTimer;
+
+      const $ = (id) => document.getElementById(id);
+      const roomForm = $("roomForm");
+
+      function showToast(message) {
+        const toast = $("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(
+          /[&<>"']/g,
+          (char) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[char],
+        );
+      }
+
+      function statusClass(status) {
+        return status.toLowerCase();
+      }
+
+      function renderRooms() {
+        const query = $("roomSearch").value.trim().toLowerCase();
+        const status = $("statusFilter").value;
+        const filtered = rooms.filter((room) => {
+          const matchesQuery = [
+            room.hostel,
+            room.number,
+            room.type,
+            room.status,
+          ].some((value) => String(value).toLowerCase().includes(query));
+          return matchesQuery && (status === "All" || room.status === status);
+        });
+
+        $("roomsTableBody").innerHTML = filtered.length
+          ? filtered
+              .map(
+                (room, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(room.number)}</td>
+          <td>${escapeHtml(room.hostel)}</td>
+          <td>${escapeHtml(room.type)}</td>
+          <td>${room.capacity} bed${room.capacity === 1 ? "" : "s"}</td>
+          <td>KES ${Number(room.price).toLocaleString("en-KE", { maximumFractionDigits: 2 })}</td>
+          <td><span class="status-badge ${statusClass(room.status)}">${escapeHtml(room.status)}</span></td>
+          <td><div class="table-actions">
+            <button class="table-action-btn" type="button" data-action="edit" data-id="${room.id}">Edit</button>
+            <button class="table-action-btn" type="button" data-action="status" data-id="${room.id}">Change status</button>
+          </div></td>
+        </tr>`,
+              )
+              .join("")
+          : '<tr><td class="empty-state" colspan="8">No rooms match your search.</td></tr>';
+
+        $("roomCountLabel").textContent =
+          `Showing ${filtered.length} of ${rooms.length} room${rooms.length === 1 ? "" : "s"}`;
+        $("totalRooms").textContent = rooms.length;
+        $("availableRooms").textContent = rooms.filter(
+          (room) => room.status === "Available",
+        ).length;
+        $("totalCapacity").textContent = rooms.reduce(
+          (sum, room) => sum + Number(room.capacity),
+          0,
+        );
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      function clearRoomForm() {
+        roomForm.reset();
+        $("roomId").value = "";
+        $("roomFormHeading").textContent = "Add New Room";
+        $("saveRoomBtn").innerHTML = '<i data-lucide="plus"></i> Save Room';
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      function editRoom(id) {
+        const room = rooms.find((item) => item.id === Number(id));
+        if (!room) return;
+        $("roomId").value = room.id;
+        $("hostelName").value = room.hostel;
+        $("roomNumber").value = room.number;
+        $("roomType").value = room.type;
+        $("capacity").value = room.capacity;
+        $("monthlyPrice").value = room.price;
+        $("roomStatus").value = room.status;
+        $("roomNotes").value = room.notes || "";
+        $("roomFormHeading").textContent = `Edit Room ${room.number}`;
+        $("saveRoomBtn").innerHTML = '<i data-lucide="save"></i> Update Room';
+        $("roomFormSection").scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      roomForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const id = $("roomId").value;
+        const room = {
+          id: id ? Number(id) : nextRoomId++,
+          hostel: $("hostelName").value,
+          number: $("roomNumber").value.trim(),
+          type: $("roomType").value,
+          capacity: Number($("capacity").value),
+          price: Number($("monthlyPrice").value),
+          status: $("roomStatus").value,
+          notes: $("roomNotes").value.trim(),
+        };
+
+        const duplicate = rooms.some(
+          (item) =>
+            item.id !== room.id &&
+            item.hostel === room.hostel &&
+            item.number.toLowerCase() === room.number.toLowerCase(),
+        );
+        if (duplicate) {
+          showToast("That room number is already used in this hostel.");
+          return;
+        }
+        if (
+          !Number.isInteger(room.capacity) ||
+          room.capacity < 1 ||
+          room.price < 0
+        ) {
+          showToast("Enter a valid capacity and non-negative price.");
+          return;
+        }
+
+        if (id) {
+          rooms = rooms.map((item) => (item.id === room.id ? room : item));
+          showToast("Room updated in this demo.");
+        } else {
+          rooms.push(room);
+          showToast("Room added in this demo.");
+        }
+        clearRoomForm();
+        renderRooms();
+      });
+
+      $("roomsTableBody").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
+        const id = Number(button.dataset.id);
+        if (button.dataset.action === "edit") {
+          editRoom(id);
+        } else if (button.dataset.action === "status") {
+          const room = rooms.find((item) => item.id === id);
+          if (!room) return;
+          const options = ["Available", "Occupied", "Maintenance"];
+          const next =
+            options[(options.indexOf(room.status) + 1) % options.length];
+          room.status = next;
+          renderRooms();
+          showToast(`${room.number} status changed to ${next} in this demo.`);
+        }
+      });
+
+      $("roomSearch").addEventListener("input", renderRooms);
+      $("statusFilter").addEventListener("change", renderRooms);
+      $("cancelRoomEditBtn").addEventListener("click", clearRoomForm);
+      $("showRoomFormBtn").addEventListener("click", () => {
+        clearRoomForm();
+        $("roomFormSection").scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        $("hostelName").focus();
+      });
+      $("supportBtn").addEventListener("click", () =>
+        showToast("Connect this button to your support contact or help page."),
+      );
+
+      $("collapseBtn").addEventListener("click", () => {
+        $("sidebar").classList.toggle("collapsed");
+      });
+
+      // Give the sidebar an ID for the collapse button.
+      document.querySelector(".sidebar").id = "sidebar";
+      renderRooms();
+      if (window.lucide) window.lucide.createIcons();
+    </script>
+    // Include the shared JS for sidebar collapse and other common behaviors.
+    <script src="home.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

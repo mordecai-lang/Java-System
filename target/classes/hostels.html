@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HostelBook | Hostel Management</title>
+
+    <!-- Connect your existing stylesheet here. -->
+    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="hostel-main-content.css" />
+
+    <!-- Lucide icons used by the existing sidebar. -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <div class="admin-layout">
+      <!-- ================= SIDEBAR ================= -->
+
+      <aside class="sidebar">
+        <button class="collapse-btn" id="collapseBtn">
+          <span class="menu-icon">☰</span>
+          <span class="menu-text">Menu</span>
+        </button>
+
+        <div class="logo-section">
+          <div class="logo-text">
+            <h1>HostelBook</h1>
+            <p>Administration Portal</p>
+          </div>
+        </div>
+
+        <!-- ================= ADMIN NAVIGATION ================= -->
+
+        <nav class="navigation">
+          <a href="/admin" class="nav-item">
+            <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
+            <span>Dashboard</span>
+          </a>
+          <a href="/users" class="nav-item">
+            <span class="nav-icon"><i data-lucide="users"></i></span>
+            <span>Manage Users</span>
+          </a>
+          <a href="/hostels" class="nav-item">
+            <span class="nav-icon"><i data-lucide="building"></i></span>
+            <span>Add Hostels</span>
+          </a>
+          <a href="/rooms" class="nav-item">
+            <span class="nav-icon"><i data-lucide="bed-double"></i></span>
+            <span>Allocate Rooms</span>
+          </a>
+          <a href="#" class="nav-item">
+            <span class="nav-icon"><i data-lucide="calendar"></i></span>
+            <span>Manage Bookings</span>
+          </a>
+          <a href="#" class="nav-item">
+            <span class="nav-icon"><i data-lucide="credit-card"></i></span>
+            <span>View Payments</span>
+          </a>
+          <a href="/settings" class="nav-item">
+            <span class="nav-icon"><i data-lucide="settings"></i></span>
+            <span>Settings</span>
+          </a>
+        </nav>
+
+        <!-- ================= NEED HELP ================= -->
+        <div class="help-card">
+          <div class="help-icon">
+            <i data-lucide="phone"></i>
+          </div>
+
+          <h3>Need Help?</h3>
+
+          <p>Contact our support team 24/7</p>
+
+          <button type="button" id="supportBtn">Get Support</button>
+        </div>
+      </aside>
+
+      <!-- ================= MAIN CONTENT ================= -->
+
+      <main class="main-content">
+        <header class="page-header">
+          <div>
+            <p class="breadcrumb">Administration / Hostels</p>
+            <h2>Hostel Management</h2>
+            <p>Manage accommodation listings and room availability.</p>
+          </div>
+        </header>
+
+        <!-- ================= ADD / EDIT HOSTEL ================= -->
+
+        <section class="content-grid">
+          <section class="content-card hostel-form-card" id="hostelFormSection">
+            <div class="section-heading">
+              <div class="section-icon">
+                <i data-lucide="building-2"></i>
+              </div>
+              <div>
+                <h3 id="formHeading">Add New Hostel</h3>
+                <p>Register a hostel and choose whether users can see it.</p>
+              </div>
+            </div>
+
+            <form id="hostelForm">
+              <input type="hidden" id="hostelId" />
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="hostelName">Hostel name <span>*</span></label>
+                  <input
+                    type="text"
+                    id="hostelName"
+                    name="hostelName"
+                    placeholder="e.g. Sunrise Hostel"
+                    maxlength="100"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="hostelLocation">Location <span>*</span></label>
+                  <input
+                    type="text"
+                    id="hostelLocation"
+                    name="hostelLocation"
+                    placeholder="e.g. Kisii"
+                    maxlength="150"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="hostelDescription">Description</label>
+                <textarea
+                  id="hostelDescription"
+                  name="hostelDescription"
+                  rows="4"
+                  placeholder="Describe the hostel and its facilities..."
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="hostelStatus">Listing status</label>
+                <select id="hostelStatus" name="hostelStatus">
+                  <option value="LISTED">Listed — visible to users</option>
+                  <option value="UNLISTED">Unlisted — hidden from users</option>
+                </select>
+                <small
+                  >Room availability will also determine which rooms users can
+                  book.</small
+                >
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="secondary-btn" id="resetFormBtn">
+                  Clear
+                </button>
+                <button type="submit" class="primary-btn" id="saveHostelBtn">
+                  <i data-lucide="plus"></i>
+                  Add Hostel
+                </button>
+                <div id="messagePopup" class="message-popup"></div>
+              </div>
+            </form>
+          </section>
+
+          <!-- ================= QUICK GUIDE ================= -->
+
+          <aside class="content-card quick-guide">
+            <div class="section-heading">
+              <div class="section-icon">
+                <i data-lucide="lightbulb"></i>
+              </div>
+              <div>
+                <h3>Quick Guide</h3>
+                <p>Steps for managing accommodation.</p>
+              </div>
+            </div>
+
+            <ol class="guide-list">
+              <li>
+                <span class="guide-number">1</span>
+                <div>
+                  <h4>Add hostel details</h4>
+                  <p>Enter the hostel name, location and description.</p>
+                </div>
+              </li>
+              <li>
+                <span class="guide-number">2</span>
+                <div>
+                  <h4>Manage rooms</h4>
+                  <p>Add rooms with their type, fee and room status.</p>
+                </div>
+              </li>
+              <li>
+                <span class="guide-number">3</span>
+                <div>
+                  <h4>Control visibility</h4>
+                  <p>List or unlist a hostel without deleting its record.</p>
+                </div>
+              </li>
+              <li>
+                <span class="guide-number">4</span>
+                <div>
+                  <h4>Keep availability accurate</h4>
+                  <p>
+                    Users should see listed hostels and rooms available for
+                    their dates.
+                  </p>
+                </div>
+              </li>
+            </ol>
+          </aside>
+        </section>
+
+        <!-- ================= HOSTEL LIST ================= -->
+
+        <section class="content-card hostel-list-card">
+          <div class="list-header">
+            <div class="section-heading">
+              <div class="section-icon">
+                <i data-lucide="list"></i>
+              </div>
+              <div>
+                <h3>All Hostels</h3>
+                <p>View, search and manage the hostels in the system.</p>
+              </div>
+            </div>
+
+            <div class="list-controls">
+              <label class="search-box" for="hostelSearch">
+                <i data-lucide="search"></i>
+                <input
+                  type="search"
+                  id="hostelSearch"
+                  placeholder="Search hostels..."
+                />
+              </label>
+
+              <select
+                id="hostelStatusFilter"
+                aria-label="Filter hostels by listing status"
+              >
+                <option value="ALL">All statuses</option>
+                <option value="LISTED">Listed</option>
+                <option value="UNLISTED">Unlisted</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="hostel-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Hostel</th>
+                  <th>Location</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Created at</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="hostelTableBody">
+                <!-- JavaScript inserts hostel rows here. -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <p id="hostelCount">Showing 0 hostels</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      lucide.createIcons();
+    </script>
+    <script src="home.js"></script>
+    <script src="hostel.js"></script>
+  </body>
+</html>
