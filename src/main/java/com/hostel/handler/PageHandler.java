@@ -28,7 +28,13 @@ public class PageHandler {
                 fileName = "index.html";
             }
 
-        } else if (path.equals("/admin")) {
+        }else if (path.equals("/book-rooms")){
+            if (AuthenticationService.isAuthenticated()) {
+                fileName = "book-rooms.html";
+            } else {
+                fileName = "index.html";
+            }
+        }else if (path.equals("/admin")) {
 
             if (AuthenticationService.isAuthenticated()
                     && AuthenticationService.getCurrentRole().equals("ADMIN")) {

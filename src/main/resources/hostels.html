@@ -213,7 +213,6 @@
             </ol>
           </aside>
         </section>
-
         <!-- ================= HOSTEL LIST ================= -->
 
         <section class="content-card hostel-list-card">
@@ -222,6 +221,7 @@
               <div class="section-icon">
                 <i data-lucide="list"></i>
               </div>
+
               <div>
                 <h3>All Hostels</h3>
                 <p>View, search and manage the hostels in the system.</p>
@@ -249,21 +249,21 @@
             </div>
           </div>
 
+          <!-- Table wrapper handles horizontal scrolling -->
           <div class="table-container">
             <table class="hostel-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Hostel</th>
+                  <th>No.</th>
+                  <th>Name</th>
                   <th>Location</th>
                   <th>Description</th>
-                  <th>Status</th>
-                  <th>Created at</th>
                   <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody id="hostelTableBody">
-                <!-- JavaScript inserts hostel rows here. -->
+                <!-- JavaScript inserts hostel records here -->
               </tbody>
             </table>
           </div>

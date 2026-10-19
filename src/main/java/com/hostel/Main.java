@@ -23,7 +23,9 @@ public class Main {
         server.createContext("/adminGetUsers",AdminHandler::handleUsers);
         server.createContext("/adminAddHostels",AdminHandler::handleHostels);
         server.createContext("/adminViewHostels",AdminHandler::handleViewHostels);
-        
+        server.createContext("/adminAddRooms",AdminHandler::handleAddRooms);
+        server.createContext("/adminViewRooms",AdminHandler::handleViewRooms);
+        server.createContext("/userBookRoom",BookingHandler::handleBookRoom);
         server.start();
 
         System.out.println("Server running at http://localhost:8080");

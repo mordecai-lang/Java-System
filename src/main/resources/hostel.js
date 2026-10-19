@@ -13,7 +13,6 @@ const hostelStatusInput = document.getElementById("hostelStatus");
 const hostelTableBody = document.getElementById("hostelTableBody");
 const hostelSearchInput = document.getElementById("hostelSearch");
 const hostelStatusFilter = document.getElementById("hostelStatusFilter");
-
 const toast = document.getElementById("toast");
 
 // 3. HELPER FUNCTIONS
@@ -57,36 +56,55 @@ function resetHostelForm() {
         lucide.createIcons();
     }
 }
+ 
+ // 4. DISPLAY HOSTELS IN THE TABLE
 
--
-// 4. DISPLAY HOSTELS IN THE TABLE
-// Currently uses the temporary array above.
+let hostels = [];
 
+// Fetch hostels saved in MySQL through your Java backend.
+async function loadHostels() {
+    try {
+        const response = await fetch(
+            "http://localhost:8080/adminViewHostels"
+        );
 
+        if (!response.ok) {
+            throw new Error("Failed to load hostels");
+        }
+
+        hostels = await response.json();
+
+        renderHostels();
+    } catch (error) {
+        console.error("Error loading hostels:", error);
+
+        hostelTableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty-state">
+                    Could not load hostels from the server.
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Display hostels in the table.
 function renderHostels() {
     const searchTerm =
         hostelSearchInput.value.trim().toLowerCase();
 
-    const statusFilter = hostelStatusFilter.value;
-
     const filteredHostels = hostels.filter(hostel => {
         const searchableText =
-            `${hostel.name} ${hostel.location} ${hostel.description}`
+            `${hostel.name} ${hostel.location} ${hostel.description || ""}`
                 .toLowerCase();
 
-        const matchesSearch = searchableText.includes(searchTerm);
-
-        const matchesStatus =
-            statusFilter === "ALL" ||
-            hostel.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
+        return searchableText.includes(searchTerm);
     });
 
     if (filteredHostels.length === 0) {
         hostelTableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="empty-state">
+                <td colspan="5" class="empty-state">
                     No hostels found. Try another search or add a hostel.
                 </td>
             </tr>
@@ -108,39 +126,13 @@ function renderHostels() {
                     </td>
 
                     <td>
-                        <span class="status-badge ${hostel.status.toLowerCase()}">
-                            ${hostel.status === "LISTED" ? "Listed" : "Unlisted"}
-                        </span>
-                    </td>
-
-                    <td>${escapeHtml(hostel.createdAt)}</td>
-
-                    <td>
-                        <div class="table-actions">
-                            <button
-                                type="button"
-                                class="table-action-btn"
-                                data-action="rooms"
-                                data-id="${hostel.id}">
-                                Manage Rooms
-                            </button>
-
-                            <button
-                                type="button"
-                                class="table-action-btn"
-                                data-action="edit"
-                                data-id="${hostel.id}">
-                                Edit
-                            </button>
-
-                            <button
-                                type="button"
-                                class="table-action-btn"
-                                data-action="toggle"
-                                data-id="${hostel.id}">
-                                ${hostel.status === "LISTED" ? "Unlist" : "List"}
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            class="table-action-btn"
+                            data-action="rooms"
+                            data-id="${hostel.id}">
+                            Manage Rooms
+                        </button>
                     </td>
                 </tr>
             `)
@@ -149,11 +141,14 @@ function renderHostels() {
 
     document.getElementById("hostelCount").textContent =
         `Showing ${filteredHostels.length} of ${hostels.length} hostels`;
-
-    if (window.lucide) {
-        lucide.createIcons();
-    }
 }
+
+// Reload the displayed rows whenever the search changes.
+hostelSearchInput.addEventListener("input", renderHostels);
+
+// Load the actual database records when the page opens.
+loadHostels();
+
 
 
 // 5. ADD HOSTEL: SEND DATA TO THE JAVA BACKEND
@@ -285,11 +280,16 @@ hostelTableBody.addEventListener("click", event => {
 // 7. OTHER FORM CONTROLS
 // --------------------------------------------------
 
-document.getElementById("resetFormBtn")
-    .addEventListener("click", resetHostelForm);
+const resetFormBtn = document.getElementById("resetFormBtn");
 
-document.getElementById("addHostelBtn")
-    .addEventListener("click", () => {
+if (resetFormBtn) {
+    resetFormBtn.addEventListener("click", resetHostelForm);
+}
+
+const addHostelBtn = document.getElementById("addHostelBtn");
+
+if (addHostelBtn) {
+    addHostelBtn.addEventListener("click", () => {
         document.getElementById("hostelFormSection").scrollIntoView({
             behavior: "smooth",
             block: "start",
@@ -297,11 +297,9 @@ document.getElementById("addHostelBtn")
 
         hostelNameInput.focus({ preventScroll: true });
     });
+}
 
 hostelSearchInput.addEventListener("input", renderHostels);
-
-hostelStatusFilter.addEventListener("change", renderHostels);
-
 // --------------------------------------------------
 // 8. SIDEBAR AND SUPPORT
 // --------------------------------------------------

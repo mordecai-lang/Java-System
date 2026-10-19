@@ -75,8 +75,8 @@
 
         <section class="booking-progress-card" aria-label="Booking progress">
           <div class="booking-progress-head">
-            <strong id="progressTitle">Step 1 of 3 · Choose a room</strong>
-            <span id="progressPercent">33% complete</span>
+            <strong id="progressTitle">Step 1 of 4 · Choose a room</strong>
+            <span id="progressPercent">25% complete</span>
           </div>
           <div class="booking-steps">
             <div class="booking-step active" data-step-indicator="1">
@@ -90,6 +90,10 @@
             <div class="booking-step" data-step-indicator="3">
               <span class="booking-step-number">3</span
               ><span>Review booking</span>
+              <div class="booking-step" data-step-indicator="4">
+                <span class="booking-step-number">4</span>
+                <span>Payment</span>
+              </div>
             </div>
           </div>
           <div class="booking-progress-track">
@@ -105,142 +109,92 @@
                 <i data-lucide="bed-double"></i>
               </div>
               <div>
-                <h3>What kind of room are you looking for?</h3>
+                <h3>Choose your hostel and room</h3>
                 <p>
-                  Choose a category and room option. The examples below are demo
-                  listings until you connect your backend.
+                  Select a hostel to see its available room types and rooms.
+                  Room details and prices will be loaded from the listings.
                 </p>
               </div>
             </div>
 
-            <div class="booking-field-grid" style="margin-bottom: 22px">
-              <div class="booking-field">
-                <label for="hostelSelect">Preferred hostel *</label>
-                <select id="hostelSelect" required>
-                  <option value="">Choose a hostel</option>
-                  <option>Maple Heights Hostel</option>
-                  <option>Campus View Residence</option>
-                  <option>Green Court Hostel</option>
-                </select>
-              </div>
-              <div class="booking-field">
-                <label for="roomSearch">Search room types</label>
-                <input
-                  id="roomSearch"
-                  type="search"
-                  placeholder="e.g. single, shared, ensuite"
-                />
-              </div>
+            <!-- Search hostels; JavaScript can filter the hostel cards -->
+            <div class="booking-field" style="margin-bottom: 18px">
+              <label for="roomSearch">Find a hostel</label>
+              <input
+                id="roomSearch"
+                type="search"
+                placeholder="Search hostels by name or location..."
+              />
             </div>
 
+            <!-- The selected hostel ID is stored here -->
+            <input type="hidden" id="hostelSelect" value="" />
+
+            <!-- Horizontally scrollable hostel cards -->
             <div class="category-scroll-wrap">
               <div class="category-scroll-title">
-                <strong>Available room categories</strong
-                ><span>Swipe sideways to explore →</span>
+                <strong>Available hostels</strong>
+                <span>Swipe sideways to explore →</span>
               </div>
               <div
                 class="category-scroll"
                 id="categoryScroll"
-                aria-label="Room categories"
+                aria-label="Available hostels"
               >
-                <button
-                  type="button"
-                  class="category-card selected"
-                  data-category="Single"
-                  aria-pressed="true"
-                >
-                  <span class="category-card-top"
-                    ><span class="category-icon"
-                      ><i data-lucide="user-round"></i></span
-                    ><i
-                      class="category-selected-mark"
-                      data-lucide="check-circle-2"
-                    ></i
-                  ></span>
-                  <strong>Single room</strong>
-                  <p>Private room for one resident.</p>
-                  <span class="category-price"
-                    >KES 8,500 <small>/ month</small></span
-                  >
-                </button>
-                <button
-                  type="button"
-                  class="category-card"
-                  data-category="Shared"
-                  aria-pressed="false"
-                >
-                  <span class="category-card-top"
-                    ><span class="category-icon"
-                      ><i data-lucide="users-round"></i></span
-                    ><i
-                      class="category-selected-mark"
-                      data-lucide="check-circle-2"
-                    ></i
-                  ></span>
-                  <strong>Shared room</strong>
-                  <p>Budget-friendly shared accommodation.</p>
-                  <span class="category-price"
-                    >KES 5,000 <small>/ month</small></span
-                  >
-                </button>
-                <button
-                  type="button"
-                  class="category-card"
-                  data-category="Ensuite"
-                  aria-pressed="false"
-                >
-                  <span class="category-card-top"
-                    ><span class="category-icon"
-                      ><i data-lucide="bath"></i></span
-                    ><i
-                      class="category-selected-mark"
-                      data-lucide="check-circle-2"
-                    ></i
-                  ></span>
-                  <strong>Ensuite room</strong>
-                  <p>Private room with an attached bathroom.</p>
-                  <span class="category-price"
-                    >KES 12,000 <small>/ month</small></span
-                  >
-                </button>
-                <button
-                  type="button"
-                  class="category-card"
-                  data-category="Studio"
-                  aria-pressed="false"
-                >
-                  <span class="category-card-top"
-                    ><span class="category-icon"
-                      ><i data-lucide="lamp-desk"></i></span
-                    ><i
-                      class="category-selected-mark"
-                      data-lucide="check-circle-2"
-                    ></i
-                  ></span>
-                  <strong>Studio room</strong>
-                  <p>Self-contained space for extra privacy.</p>
-                  <span class="category-price"
-                    >KES 16,000 <small>/ month</small></span
-                  >
-                </button>
+                <p class="empty-state">Loading available hostels...</p>
               </div>
             </div>
 
             <div class="available-strip">
-              <i data-lucide="check-circle-2" size="17"></i
-              ><span id="availabilityMessage"
-                >Demo availability: 6 single rooms listed. Confirm actual
-                availability with the hostel.</span
-              >
+              <i data-lucide="check-circle-2" size="17"></i>
+              <span id="availabilityMessage">
+                Select a hostel to view its available rooms.
+              </span>
             </div>
+
+            <!-- Room selection and automatically populated details -->
+            <div
+              class="booking-field-grid"
+              style="margin-top: 22px; margin-bottom: 18px"
+            >
+              <div class="booking-field">
+                <label for="roomSelect">Available room number *</label>
+                <select id="roomSelect" required disabled>
+                  <option value="">Choose a hostel first</option>
+                </select>
+              </div>
+
+              <div class="booking-field">
+                <label for="roomTypeDisplay">Room type</label>
+                <input
+                  id="roomTypeDisplay"
+                  type="text"
+                  placeholder="Selected automatically"
+                  readonly
+                />
+              </div>
+
+              <div class="booking-field">
+                <label for="accommodationFeeDisplay">Accommodation fee</label>
+                <input
+                  id="accommodationFeeDisplay"
+                  type="text"
+                  placeholder="Selected automatically"
+                  readonly
+                />
+              </div>
+            </div>
+
+            <!-- Move-in date and length of stay remain -->
             <div class="booking-field-grid" style="margin-bottom: 18px">
               <div class="booking-field">
-                <label for="checkIn">Move-in date *</label
-                ><input type="date" id="checkIn" required />
+                <label for="checkIn">Move-in date *</label>
+                <input type="date" id="checkIn" required />
               </div>
+
               <div class="booking-field">
-                <label for="stayMonths">Length of stay *</label
-                ><select id="stayMonths" required>
+                <label for="stayMonths">Length of stay *</label>
+                <select id="stayMonths" required>
                   <option value="1">1 month</option>
                   <option value="3">3 months</option>
                   <option value="6">6 months</option>
@@ -249,46 +203,21 @@
                 </select>
               </div>
             </div>
-            <div class="booking-options" id="roomOptions">
-              <label class="room-option"
-                ><input
-                  type="radio"
-                  name="roomOption"
-                  value="Single · Room S-104"
-                  data-price="8500"
-                  checked
-                /><span class="room-option-body"
-                  ><strong>Single · Room S-104</strong>
-                  <p>Study desk · Wardrobe · Shared facilities</p></span
-                ><span class="room-option-price"
-                  >KES 8,500<small>/ month</small></span
-                ></label
-              >
-              <label class="room-option"
-                ><input
-                  type="radio"
-                  name="roomOption"
-                  value="Single · Room S-208"
-                  data-price="8500"
-                /><span class="room-option-body"
-                  ><strong>Single · Room S-208</strong>
-                  <p>Study desk · Wardrobe · Near common area</p></span
-                ><span class="room-option-price"
-                  >KES 8,500<small>/ month</small></span
-                ></label
-              >
-            </div>
+
+            <!-- Keep this ID for the booking JavaScript -->
+            <div class="booking-options" id="roomOptions"></div>
+
             <div class="booking-note" style="margin-top: 18px">
-              <i data-lucide="info" size="17"></i
-              ><span
-                >Room categories and prices are sample data for the interface.
-                When connected, this list should come from room types and
-                available rooms published by the administrator.</span
-              >
+              <i data-lucide="info" size="17"></i>
+              <span>
+                Room details and prices come from the hostel listings. A booking
+                must still be checked and confirmed by the server.
+              </span>
             </div>
           </section>
 
           <!-- STEP 2 -->
+
           <section
             class="booking-panel booking-step-panel"
             data-step="2"
@@ -298,6 +227,7 @@
               <div class="booking-panel-icon">
                 <i data-lucide="contact-round"></i>
               </div>
+
               <div>
                 <h3>Tell us about yourself</h3>
                 <p>
@@ -306,20 +236,23 @@
                 </p>
               </div>
             </div>
+
             <div class="booking-field-grid">
               <div class="booking-field">
-                <label for="fullName">Full name *</label
-                ><input
+                <label for="fullName">Full name *</label>
+                <input
                   id="fullName"
                   name="fullName"
+                  type="text"
                   autocomplete="name"
                   placeholder="As shown on your ID"
                   required
                 />
               </div>
+
               <div class="booking-field">
-                <label for="email">Email address *</label
-                ><input
+                <label for="email">Email address *</label>
+                <input
                   id="email"
                   name="email"
                   type="email"
@@ -328,46 +261,30 @@
                   required
                 />
               </div>
+
               <div class="booking-field">
-                <label for="phone">Phone number *</label
-                ><input
+                <label for="phone">Phone number *</label>
+                <input
                   id="phone"
                   name="phone"
                   type="tel"
                   autocomplete="tel"
                   placeholder="e.g. 07XX XXX XXX"
                   required
-                /><small>Use a number where the hostel can reach you.</small>
-              </div>
-              <div class="booking-field">
-                <label for="occupants">Number of occupants *</label
-                ><select id="occupants" required>
-                  <option value="1">1 occupant</option>
-                  <option value="2">2 occupants</option>
-                  <option value="3">3 occupants</option>
-                  <option value="4">4 occupants</option>
-                </select>
-              </div>
-              <div class="booking-field full">
-                <label for="specialRequests"
-                  >Additional requests (optional)</label
-                ><textarea
-                  id="specialRequests"
-                  rows="3"
-                  placeholder="Accessibility needs, preferred floor, or questions for the hostel"
-                ></textarea
-                ><small
-                  >Requests are subject to availability and confirmation by the
-                  hostel.</small
-                >
+                />
+                <small> Use a number where the hostel can reach you. </small>
               </div>
             </div>
+
+            <!-- One room per booking: occupant count is fixed at 1. -->
+            <input type="hidden" id="occupants" name="occupants" value="1" />
+
             <div class="booking-note" style="margin-top: 18px">
-              <i data-lucide="lock-keyhole" size="17"></i
-              ><span
-                >Only provide information needed for your reservation. Do not
-                enter payment card details on this page.</span
-              >
+              <i data-lucide="lock-keyhole" size="17"></i>
+              <span>
+                Only provide information needed for your reservation. Do not
+                enter payment card details on this page.
+              </span>
             </div>
           </section>
 
@@ -443,6 +360,114 @@
             </div>
           </section>
 
+          <!-- STEP 4: PAYMENT -->
+          <section
+            class="booking-panel booking-step-panel"
+            data-step="4"
+            hidden
+          >
+            <div class="booking-panel-heading">
+              <div class="booking-panel-icon">
+                <i data-lucide="wallet"></i>
+              </div>
+              <div>
+                <h3>Complete your payment</h3>
+                <p>
+                  Pay securely using M-Pesa to complete your hostel booking.
+                </p>
+              </div>
+            </div>
+
+            <div class="payment-glass-card">
+              <div class="payment-card-top">
+                <div>
+                  <span class="payment-eyebrow">PAYMENT METHOD</span>
+                  <h4>Choose how to pay</h4>
+                </div>
+                <i data-lucide="shield-check" size="23"></i>
+              </div>
+
+              <!-- M-Pesa is the only payment method for now -->
+              <label class="mpesa-method-card" for="mpesaMethod">
+                <input
+                  type="radio"
+                  id="mpesaMethod"
+                  name="paymentMethod"
+                  value="MPESA"
+                />
+
+                <span class="mpesa-brand-mark" aria-hidden="true">M</span>
+
+                <span class="mpesa-method-info">
+                  <strong>M-PESA</strong>
+                  <small>Pay using your M-Pesa registered phone</small>
+                </span>
+
+                <span class="mpesa-radio-visual" aria-hidden="true"></span>
+              </label>
+
+              <div class="booking-field payment-phone-field">
+                <label for="mpesaPhone">M-Pesa phone number *</label>
+                <input
+                  id="mpesaPhone"
+                  name="mpesaPhone"
+                  type="tel"
+                  autocomplete="tel"
+                  placeholder="e.g. 07XX XXX XXX"
+                  required
+                />
+                <small>
+                  This number will receive the M-Pesa payment prompt. You can
+                  edit it if you want to pay from another number.
+                </small>
+              </div>
+
+              <div class="payment-amount-row">
+                <div>
+                  <span>Total booking amount</span>
+                  <small>Based on your selected room and stay duration</small>
+                </div>
+                <strong id="paymentTotal">KES 0.00</strong>
+              </div>
+
+              <label class="payment-confirmation" for="paymentConfirm">
+                <input
+                  type="checkbox"
+                  id="paymentConfirm"
+                  name="paymentConfirm"
+                  required
+                />
+                <span>
+                  I have reviewed my booking details and confirm that I want to
+                  proceed with this payment.
+                </span>
+              </label>
+
+              <button
+                type="button"
+                class="booking-btn primary payment-submit-btn"
+                id="payBtn"
+                disabled
+              >
+                <i data-lucide="lock-keyhole" size="17"></i>
+                Pay with M-Pesa
+              </button>
+
+              <p class="payment-security-note">
+                <i data-lucide="shield-check" size="15"></i>
+                Your booking will only be marked as paid after payment
+                confirmation is received from the payment service.
+              </p>
+
+              <div
+                id="paymentStatus"
+                class="payment-status"
+                role="status"
+                aria-live="polite"
+              ></div>
+            </div>
+          </section>
+
           <div class="booking-actions">
             <button
               type="button"
@@ -450,11 +475,14 @@
               id="backBtn"
               disabled
             >
-              <i data-lucide="arrow-left" size="16"></i> Back
+              <i data-lucide="arrow-left" size="16"></i>
+              Back
             </button>
-            <span class="booking-footer-note"
-              >Step-by-step booking · No payment collected here</span
-            >
+
+            <span class="booking-footer-note">
+              Step-by-step booking · No payment collected here
+            </span>
+
             <button type="button" class="booking-btn primary" id="nextBtn">
               Continue <i data-lucide="arrow-right" size="16"></i>
             </button>
@@ -468,468 +496,9 @@
         ></div>
       </main>
     </div>
-
+    <script src="booking-room.js"></script>
     <script>
-      // Frontend demonstration only. Replace these sample room options with data from your Java backend.
-      const roomCatalog = {
-        Single: {
-          price: 8500,
-          count: 6,
-          rooms: [
-            {
-              name: "Single · Room S-104",
-              detail: "Study desk · Wardrobe · Shared facilities",
-              price: 8500,
-            },
-            {
-              name: "Single · Room S-208",
-              detail: "Study desk · Wardrobe · Near common area",
-              price: 8500,
-            },
-          ],
-        },
-        Shared: {
-          price: 5000,
-          count: 9,
-          rooms: [
-            {
-              name: "Shared · Room SH-12",
-              detail: "Two-person room · Individual storage",
-              price: 5000,
-            },
-            {
-              name: "Shared · Room SH-18",
-              detail: "Two-person room · Study area",
-              price: 5000,
-            },
-          ],
-        },
-        Ensuite: {
-          price: 12000,
-          count: 3,
-          rooms: [
-            {
-              name: "Ensuite · Room E-06",
-              detail: "Private bathroom · Study desk",
-              price: 12000,
-            },
-            {
-              name: "Ensuite · Room E-11",
-              detail: "Private bathroom · Wardrobe",
-              price: 12000,
-            },
-          ],
-        },
-        Studio: {
-          price: 16000,
-          count: 2,
-          rooms: [
-            {
-              name: "Studio · Room ST-03",
-              detail: "Self-contained · Compact kitchenette",
-              price: 16000,
-            },
-            {
-              name: "Studio · Room ST-07",
-              detail: "Self-contained · Study area",
-              price: 16000,
-            },
-          ],
-        },
-      };
-      let currentStep = 1;
-      let selectedCategory = "Single";
-      const $ = (id) => document.getElementById(id);
-      const stepPanels = [...document.querySelectorAll(".booking-step-panel")];
-      const stepIndicators = [
-        ...document.querySelectorAll("[data-step-indicator]"),
-      ];
-      const today = new Date();
-      const localToday = new Date(
-        today.getTime() - today.getTimezoneOffset() * 60000,
-      )
-        .toISOString()
-        .slice(0, 10);
-      $("checkIn").min = localToday;
-
-      function money(amount) {
-        return new Intl.NumberFormat("en-KE", {
-          style: "currency",
-          currency: "KES",
-          maximumFractionDigits: 0,
-        }).format(amount);
-      }
-      function selectedRoomInput() {
-        return document.querySelector('input[name="roomOption"]:checked');
-      }
-      function showToast(message) {
-        const toast = $("bookingToast");
-        toast.textContent = message;
-        toast.classList.add("show");
-        window.clearTimeout(showToast.timer);
-        showToast.timer = window.setTimeout(
-          () => toast.classList.remove("show"),
-          4200,
-        );
-      }
-      function renderRoomOptions() {
-        const query = $("roomSearch").value.trim().toLowerCase();
-        const catalog = roomCatalog[selectedCategory];
-        const rooms = catalog.rooms.filter((room) =>
-          `${room.name} ${room.detail} ${selectedCategory}`
-            .toLowerCase()
-            .includes(query),
-        );
-        $("roomOptions").innerHTML = "";
-        if (!rooms.length) {
-          $("roomOptions").innerHTML =
-            '<div class="booking-note" style="grid-column:1/-1"><i data-lucide="search-x" size="17"></i><span>No demo room options match that search. Try another term or choose a different category.</span></div>';
-        } else {
-          rooms.forEach((room, index) => {
-            const label = document.createElement("label");
-            label.className = "room-option";
-            const radio = document.createElement("input");
-            radio.type = "radio";
-            radio.name = "roomOption";
-            radio.value = room.name;
-            radio.dataset.price = String(room.price);
-            radio.checked = index === 0;
-            const body = document.createElement("span");
-            body.className = "room-option-body";
-            const title = document.createElement("strong");
-            title.textContent = room.name;
-            const detail = document.createElement("p");
-            detail.textContent = room.detail;
-            body.append(title, detail);
-            const price = document.createElement("span");
-            price.className = "room-option-price";
-            price.append(document.createTextNode(money(room.price)));
-            const per = document.createElement("small");
-            per.textContent = "/ month";
-            price.append(per);
-            label.append(radio, body, price);
-            $("roomOptions").append(label);
-          });
-        }
-        $("availabilityMessage").textContent =
-          `Demo availability: ${catalog.count} ${selectedCategory.toLowerCase()} rooms listed. Confirm actual availability with the hostel.`;
-        if (window.lucide) lucide.createIcons();
-      }
-      function selectCategory(category) {
-        if (!roomCatalog[category]) return;
-        selectedCategory = category;
-        document.querySelectorAll(".category-card").forEach((card) => {
-          const active = card.dataset.category === category;
-          card.classList.toggle("selected", active);
-          card.setAttribute("aria-pressed", String(active));
-        });
-        renderRoomOptions();
-      }
-      function validateStep(step) {
-        const panel = document.querySelector(
-          `.booking-step-panel[data-step="${step}"]`,
-        );
-        if (step === 1) {
-          const required = [$("hostelSelect"), $("checkIn"), $("stayMonths")];
-          for (const field of required) {
-            if (!field.value) {
-              field.reportValidity();
-              field.focus();
-              return false;
-            }
-          }
-          if ($("checkIn").value < localToday) {
-            $("checkIn").setCustomValidity("Choose today or a future date.");
-            $("checkIn").reportValidity();
-            $("checkIn").setCustomValidity("");
-            return false;
-          }
-          if (!selectedRoomInput()) {
-            showToast("Choose one of the listed room options to continue.");
-            return false;
-          }
-        }
-        if (step === 2) {
-          const required = [
-            $("fullName"),
-            $("email"),
-            $("phone"),
-            $("occupants"),
-          ];
-          for (const field of required) {
-            if (!field.checkValidity()) {
-              field.reportValidity();
-              field.focus();
-              return false;
-            }
-          }
-        }
-        if (step === 3 && !$("confirmDetails").checked) {
-          $("confirmDetails").reportValidity();
-          showToast("Please confirm your booking details before continuing.");
-          return false;
-        }
-        return true;
-      }
-      function fillReview() {
-        const room = selectedRoomInput();
-        const months = Number($("stayMonths").value || 1);
-        const price = room
-          ? Number(room.dataset.price)
-          : roomCatalog[selectedCategory].price;
-        const date = $("checkIn").value
-          ? new Date(`${$("checkIn").value}T00:00:00`)
-          : null;
-        $("reviewHostel").textContent = $("hostelSelect").value || "—";
-        $("reviewCategory").textContent = `${selectedCategory} room`;
-        $("reviewRoom").textContent = room ? room.value : "—";
-        $("reviewDate").textContent = date
-          ? date.toLocaleDateString("en-KE", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })
-          : "—";
-        $("reviewDuration").textContent =
-          `${months} ${months === 1 ? "month" : "months"}`;
-        $("reviewOccupants").textContent =
-          `${$("occupants").value} ${$("occupants").value === "1" ? "occupant" : "occupants"}`;
-        $("reviewName").textContent = $("fullName").value.trim() || "—";
-        $("reviewContact").textContent =
-          [$("email").value.trim(), $("phone").value.trim()]
-            .filter(Boolean)
-            .join(" · ") || "—";
-        $("reviewTotal").textContent = money(price * months);
-        $("reviewPriceNote").textContent =
-          `${money(price)} per month × ${months} ${months === 1 ? "month" : "months"}. Estimate only; no payment has been made.`;
-      }
-      function goToStep(step) {
-        currentStep = step;
-        stepPanels.forEach((panel) => {
-          panel.hidden = Number(panel.dataset.step) !== step;
-        });
-        stepIndicators.forEach((indicator) => {
-          const n = Number(indicator.dataset.stepIndicator);
-          indicator.classList.toggle("active", n === step);
-          indicator.classList.toggle("done", n < step);
-          const number = indicator.querySelector(".booking-step-number");
-          number.innerHTML =
-            n < step ? '<i data-lucide="check" size="15"></i>' : String(n);
-        });
-        const titles = {
-          1: "Choose a room",
-          2: "Your details",
-          3: "Review booking",
-        };
-        $("progressTitle").textContent = `Step ${step} of 3 · ${titles[step]}`;
-        $("progressPercent").textContent =
-          `${Math.round((step / 3) * 100)}% complete`;
-        $("progressFill").style.width = `${(step / 3) * 100}%`;
-        $("backBtn").disabled = step === 1;
-        $("nextBtn").innerHTML =
-          step === 3
-            ? '<i data-lucide="credit-card" size="16"></i> Make payment'
-            : 'Continue <i data-lucide="arrow-right" size="16"></i>';
-        if (step === 3) fillReview();
-        if (window.lucide) lucide.createIcons();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-      document
-        .querySelectorAll(".category-card")
-        .forEach((card) =>
-          card.addEventListener("click", () =>
-            selectCategory(card.dataset.category),
-          ),
-        );
-      $("roomSearch").addEventListener("input", renderRoomOptions);
-      $("nextBtn").addEventListener("click", () => {
-        if (!validateStep(currentStep)) return;
-        if (currentStep < 3) goToStep(currentStep + 1);
-        else
-          showToast(
-            "Payment step placeholder: your booking summary is ready. Connect your Java booking endpoint and payment flow here; no payment was processed.",
-          );
-      });
-      $("backBtn").addEventListener("click", () => {
-        if (currentStep > 1) goToStep(currentStep - 1);
-      });
-      $("stayMonths").addEventListener("change", () => {
-        if (currentStep === 3) fillReview();
-      });
-      $("occupants").addEventListener("change", () => {
-        if (currentStep === 3) fillReview();
-      });
-      $("hostelSelect").addEventListener("change", () => {
-        if (currentStep === 3) fillReview();
-      });
-      $("checkIn").addEventListener("change", () => {
-        if (currentStep === 3) fillReview();
-      });
-      $("fullName").addEventListener("input", () => {
-        if (currentStep === 3) fillReview();
-      });
-      $("email").addEventListener("input", () => {
-        if (currentStep === 3) fillReview();
-      });
-      $("phone").addEventListener("input", () => {
-        if (currentStep === 3) fillReview();
-      });
-      $("roomOptions").addEventListener("change", () => {
-        if (currentStep === 3) fillReview();
-      });
-      $("collapseBtn")?.addEventListener("click", () =>
-        document
-          .querySelector(".booking-layout > .sidebar")
-          ?.classList.toggle("collapsed"),
-      );
-      $("supportBtn")?.addEventListener("click", () =>
-        showToast(
-          "Support contact can be connected here. No support request was sent.",
-        ),
-      );
-      renderRoomOptions();
-      if (window.lucide) lucide.createIcons();
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById("bookingForm");
-        const steps = [...document.querySelectorAll(".booking-step-panel")];
-        const nextBtn = document.getElementById("nextBtn");
-        const backBtn = document.getElementById("backBtn");
-        const toast = document.getElementById("bookingToast");
-
-        let currentStep = 1;
-
-        function showMessage(message) {
-          toast.textContent = message;
-          toast.classList.add("show");
-        }
-
-        function showStep(stepNumber) {
-          currentStep = stepNumber;
-
-          steps.forEach((section) => {
-            const isCurrent = Number(section.dataset.step) === stepNumber;
-            section.hidden = !isCurrent;
-          });
-
-          backBtn.disabled = stepNumber === 1;
-
-          nextBtn.innerHTML =
-            stepNumber === 3
-              ? 'Make payment <i data-lucide="credit-card" size="16"></i>'
-              : 'Continue <i data-lucide="arrow-right" size="16"></i>';
-
-          if (window.lucide) {
-            window.lucide.createIcons();
-          }
-
-          // Keep the active step visible after navigation.
-          document.querySelector(".page-header")?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
-
-        function validateStep(stepNumber) {
-          const section = steps.find(
-            (item) => Number(item.dataset.step) === stepNumber,
-          );
-
-          const fields = section.querySelectorAll(
-            "input:not([type=hidden]), select, textarea",
-          );
-
-          for (const field of fields) {
-            if (field.type === "checkbox" && !field.checked) {
-              field.reportValidity();
-              return false;
-            }
-
-            if (!field.checkValidity()) {
-              field.reportValidity();
-              return false;
-            }
-          }
-
-          return true;
-        }
-
-        function updateReview() {
-          const selectedRoom = document.querySelector(
-            'input[name="roomOption"]:checked',
-          );
-
-          const hostel = document.getElementById("hostelSelect");
-          const category = document.querySelector(".category-card.selected");
-
-          const months = Number(document.getElementById("stayMonths").value);
-
-          const price = Number(selectedRoom?.dataset.price || 0);
-          const total = price * months;
-
-          const checkIn = document.getElementById("checkIn").value;
-          const dateText = checkIn
-            ? new Date(checkIn + "T00:00:00").toLocaleDateString()
-            : "—";
-
-          document.getElementById("reviewHostel").textContent =
-            hostel.value || "—";
-
-          document.getElementById("reviewCategory").textContent =
-            category?.dataset.category || "—";
-
-          document.getElementById("reviewRoom").textContent =
-            selectedRoom?.value || "—";
-
-          document.getElementById("reviewDate").textContent = dateText;
-
-          document.getElementById("reviewDuration").textContent =
-            `${months} month${months === 1 ? "" : "s"}`;
-
-          document.getElementById("reviewOccupants").textContent =
-            document.getElementById("occupants").value;
-
-          document.getElementById("reviewName").textContent =
-            document.getElementById("fullName").value;
-
-          document.getElementById("reviewContact").textContent =
-            document.getElementById("email").value +
-            " · " +
-            document.getElementById("phone").value;
-
-          document.getElementById("reviewTotal").textContent =
-            "KES " + total.toLocaleString("en-KE");
-        }
-
-        nextBtn.addEventListener("click", () => {
-          if (currentStep < 3) {
-            if (!validateStep(currentStep)) return;
-
-            if (currentStep === 2) {
-              updateReview();
-            }
-
-            showStep(currentStep + 1);
-            return;
-          }
-
-          // Placeholder only: no payment is processed.
-          if (!validateStep(3)) return;
-
-          showMessage(
-            "Booking details reviewed. Payment integration will be added here.",
-          );
-        });
-
-        backBtn.addEventListener("click", () => {
-          if (currentStep > 1) {
-            showStep(currentStep - 1);
-          }
-        });
-
-        // Start on Step 1.
-        showStep(1);
-      });
+      lucide.createIcons();
     </script>
   </body>
 </html>

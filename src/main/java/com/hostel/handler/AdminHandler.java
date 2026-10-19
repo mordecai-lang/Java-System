@@ -13,11 +13,15 @@ import com.hostel.util.ResponseUtil;
 import com.hostel.service.AdminService;
 
 import com.hostel.model.User;
+import com.hostel.model.Hostel;
+import com.hostel.model.Room;
+
 import com.hostel.service.AuthenticationService;
 import com.hostel.util.JsonResponseUtil;
 import com.hostel.util.JsonUtil;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 public class AdminHandler{
   public static void handleAddUsers(HttpExchange exchange) throws IOException {
@@ -132,6 +136,105 @@ public class AdminHandler{
     List<Hostel> hostels = AdminService.getLatestHostels();
 
     String json = JsonUtil.hostelsToJson(hostels);
+    JsonResponseUtil.send(exchange, 200, json);
+  }
+
+ // Adding rooms
+  public static void handleAddRooms(HttpExchange exchange)throws IOException {
+    if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+        ResponseUtil.send(exchange, 405, "Accepting only POST");
+        return;
+    }
+    
+    //1.Read the POST request body sent by JavaScript
+    String body = new String(exchange.getRequestBody().readAllBytes(),StandardCharsets.UTF_8);
+
+    //2.Parse the submitted form data
+    Map<String, String> data = FormDataParser.parse(body);
+
+    //3.Extract values matching your existing HTML IDs
+    String hostelIdStr = data.get("hostelId");
+    String roomNumber = data.get("roomNumber");
+    String totalBedsStr = data.get("beds");
+    String roomType = data.get("roomType");
+    String feeStr = data.get("accommodationFee");
+    String status = data.get("roomStatus");
+
+    //4.Validate required fields
+    if (hostelIdStr == null || roomNumber == null
+            || totalBedsStr == null || roomType == null
+            || feeStr == null
+            || hostelIdStr.isBlank() || roomNumber.isBlank()
+            || totalBedsStr.isBlank() || roomType.isBlank()
+            || feeStr.isBlank()) {
+        
+        ResponseUtil.send(exchange, 400, "Please provide all required fields.");
+        return;
+    }
+
+    // The status dropdown defaults to AVAILABLE in your HTML.
+    if (status == null || status.isBlank()) {
+        status = "AVAILABLE";
+    }
+
+    try {
+        int hostelId = Integer.parseInt(hostelIdStr);
+        int totalBeds = Integer.parseInt(totalBedsStr);
+
+        // BigDecimal is more appropriate for monetary values.
+        java.math.BigDecimal accommodationFee =
+            new java.math.BigDecimal(feeStr);
+
+        if (hostelId <= 0 || totalBeds < 1
+                || accommodationFee.signum() < 0) {
+
+            ResponseUtil.send(exchange, 400, "Invalid numeric values.");
+            return;
+        }
+
+        if (!java.util.Set.of("Single", "Double", "Shared")
+                .contains(roomType)) {
+            ResponseUtil.send(exchange, 400, "Invalid room type.");
+            return;
+        }
+
+        if (!java.util.Set.of("AVAILABLE", "MAINTENANCE", "CLOSED")
+            .contains(status)) {
+            ResponseUtil.send(exchange, 400, "Invalid room status.");
+            return;
+        }
+
+
+        // 5. Call the service to save the room
+        boolean success = AdminService.addRoom(hostelId,roomNumber.trim(),totalBeds,roomType,accommodationFee,status);
+
+        if (success) {
+            ResponseUtil.send(exchange, 201, "Room added successfully!");
+        }else {
+            ResponseUtil.send(exchange, 409,"Room could not be added. Check the hostel and room details.");
+        }
+
+    } catch (NumberFormatException e) {
+        ResponseUtil.send(exchange, 400, "Invalid hostel ID or bed count.");
+
+    } catch (IllegalArgumentException e) {
+        ResponseUtil.send(exchange, 400, "Invalid accommodation fee.");
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        ResponseUtil.send(exchange, 500, "An error occurred while adding the room.");
+    }
+  }
+
+  // Viewing Rooms
+  public static void handleViewRooms(HttpExchange exchange) throws IOException {
+    if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
+        ResponseUtil.send(exchange, 405, "Accepting only GET");
+        return;
+    }
+    List<Room> rooms = AdminService.getLatestRooms();
+
+    String json = JsonUtil.roomsToJson(rooms);
     JsonResponseUtil.send(exchange, 200, json);
   }
 }

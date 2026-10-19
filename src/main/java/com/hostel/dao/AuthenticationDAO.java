@@ -18,7 +18,7 @@ public class AuthenticationDAO {
     static final String user = "root";
     static final String dbPassword = "John3:16";
 
-
+    //Checks if the provided email and password match a user in the database and returns the user's role if successful, or null if not.
     public static String checkLogin(String email, String password) {
 
         String sql = "SELECT password, role FROM authentication WHERE email = ?";
@@ -46,7 +46,7 @@ public class AuthenticationDAO {
         return null;
     }
 
-
+    //Add register data to the database
     public static boolean insertRegisterData(String name,String email,String password) {
 
         String sql = "INSERT INTO authentication (name, email, password) VALUES (?, ?, ?)";
@@ -69,7 +69,7 @@ public class AuthenticationDAO {
         }
         return true;
     }
-
+    //Adding User to the database by an admin
     public static boolean insertUser(String name, String email, String password, String role) {
         String sql = "INSERT INTO authentication (name, email, password, role) VALUES (?, ?, ?, ?)";
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt(12));
@@ -93,6 +93,7 @@ public class AuthenticationDAO {
         return true;
     }
 
+    //Remove User from the database by an admin
     public static boolean deleteUser(String email) {
         String sql = "DELETE FROM authentication WHERE email = ?";
     
@@ -115,6 +116,7 @@ public class AuthenticationDAO {
         }
     }
 
+    //List Users from the database by an admin
     public static List<User> getLatestUsers() {
         
         String sql = "SELECT id, name, email, role FROM authentication ORDER BY id DESC LIMIT 10";
@@ -126,7 +128,7 @@ public class AuthenticationDAO {
             ResultSet result = statement.executeQuery();
 
             while (result.next()) {
-                User user = new User( result.getInt("id"),result.getString("name"),result.getString("email"),result.getString("role"));
+                User user = new User(result.getInt("id"), result.getString("name"), result.getString("email"), result.getString("role"));
                 users.add(user);
             }
         }catch (SQLException e) {
@@ -134,4 +136,6 @@ public class AuthenticationDAO {
         }
         return users;
     }
+
+    
 }

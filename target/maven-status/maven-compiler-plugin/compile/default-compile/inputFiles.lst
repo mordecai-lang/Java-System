@@ -2,11 +2,15 @@ D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\dao\AuthenticationDAO.jav
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\dao\HostelsAndRoomsDAO.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\handler\AdminHandler.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\handler\AuthenticationHandler.java
+D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\handler\BookingHandler.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\handler\PageHandler.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\Main.java
+D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\model\Hostel.java
+D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\model\Room.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\model\User.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\services\AdminService.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\services\AuthenticationService.java
+D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\services\BookingService.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\util\FormDataParser.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\util\JsonResponseUtil.java
 D:\JavaProjects\jdbc-learning\src\main\java\com\hostel\util\JsonUtil.java
