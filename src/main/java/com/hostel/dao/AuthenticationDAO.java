@@ -1,5 +1,5 @@
 package com.hostel.dao;
-
+import com.hostel.AuthenticationResult;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,25 +19,29 @@ public class AuthenticationDAO {
     static final String dbPassword = "John3:16";
 
     //Checks if the provided email and password match a user in the database and returns the user's role if successful, or null if not.
-    public static String checkLogin(String email, String password) {
-
-        String sql = "SELECT password, role FROM authentication WHERE email = ?";
+    public static AuthenticationResult checkLogin(String email, String password) {
+        String sql = """
+        SELECT id, password, role
+        FROM authentication
+        WHERE email = ?
+        """;
 
         try (
             Connection connection = DriverManager.getConnection(url, user, dbPassword);
             PreparedStatement statement = connection.prepareStatement(sql)
         ) {
-            
             statement.setString(1, email);
-            ResultSet result = statement.executeQuery();
-            
+            try (ResultSet result = statement.executeQuery()) {
             if (result.next()) {
+                int userId = result.getInt("id");
                 String storedHash = result.getString("password");
                 String role = result.getString("role");
+
                 if (BCrypt.checkpw(password, storedHash)) {
-                    return role;
+                    return new AuthenticationResult(userId, role);
                 }
             }
+        }
 
         } catch (SQLException e) {
             e.printStackTrace();

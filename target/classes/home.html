@@ -249,71 +249,55 @@
   </div>
 
 </div>
-        <!-- ================= BOTTOM SECTION ================= -->
+  
+<!-- ================= BOTTOM SECTION ================= -->
 
-        <div class="bottom-grid">
-          <!-- Recent Bookings -->
+<div class="bottom-grid">
 
-          <div class="recent-card">
-            <div class="card-header">
-              <h2>Recent Bookings</h2>
+    <!-- Recent Bookings -->
+    <div class="recent-card">
+        <div class="card-header">
+            <h2>Recent Bookings</h2>
+            <a href="adminBookings.html">View All →</a>
+        </div>
 
-              <a href="#"> View All → </a>
-            </div>
+        
+<div class="booking-table-scroll">
+    <div class="booking-table">
+        <div class="table-header">
+            <span>Room</span>
+            <span>Hostel</span>
+            <span>Check-in</span>
+            <span>Check-out</span>
+            <span>Status</span>
+        </div>
 
-            <div class="booking-table">
-              <div class="table-header">
-                <span>Room</span>
-                <span>Hostel</span>
-                <span>Check-in</span>
-                <span>Check-out</span>
-                <span>Status</span>
-              </div>
+        <div id="recentBookingsBody">
+            <p class="booking-message">Loading recent bookings...</p>
+        </div>
+    </div>
+</div>
 
-              <div class="booking-row">
-                <span> Room 101 </span>
+    </div>
 
-                <span> Sunrise Hostel </span>
+    <!-- Explore Hostels -->
+    <div class="explore-card">
+        <div class="explore-icon">
+            <i data-lucide="building-2"></i>
+        </div>
 
-                <span> 2025-09-25 </span>
+        <h2>A Comfortable Stay Awaits</h2>
 
-                <span> 2025-09-30 </span>
+        <p>Safe, clean and affordable hostels for your academic journey.</p>
 
-                <span class="status confirmed"> Confirmed </span>
-              </div>
-
-              <div class="booking-row">
-                <span> Room 203 </span>
-
-                <span> Riverside Hostel </span>
-
-                <span> 2025-10-05 </span>
-
-                <span> 2025-10-10 </span>
-
-                <span class="status pending"> Pending </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Explore Hostels -->
-
-          <div class="explore-card">
-
-  <div class="explore-icon">
-    <i data-lucide="building-2"></i>
-  </div>
-
-  <h2>A Comfortable Stay Awaits</h2>
-
-  <p>Safe, clean and affordable hostels for your academic journey.</p>
-
-  <button>Explore Hostels</button>
+        <button>Explore Hostels</button>
+    </div>
 
 </div>
-        </div>
+       
+
       </section>
-    </main>
+          </main>
     <script src="home.js"></script>
     <script>
       lucide.createIcons();

@@ -1,0 +1,304 @@
+
+/* ==================================================
+   MANAGE BOOKINGS - INDEPENDENT PAGE STYLES
+   Does not depend on home.css or hostel-main-content.css
+   ================================================== */
+
+/* ================= GLOBAL RESET ================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fc;
+    color: #263a72;
+}
+
+
+
+/* ================= MAIN CONTENT ================= */
+
+.admin-container {
+    width: auto;
+    min-width: 0;
+    min-height: 100vh;
+    margin-left: 260px;
+    padding: 35px;
+}
+
+/* ================= PAGE HEADER ================= */
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: #0b0645;
+    background: #34f42e;
+    border: 1px solid #e2defe;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.back-link svg {
+    width: 18px;
+    height: 18px;
+}
+
+.back-link:hover {
+    color: #ffffff;
+    background: #0f7622;
+    border-color: #216e5b;
+    transform: translateX(-2px);
+}
+.page-header h1 {
+    margin-bottom: 9px;
+    color: #263a72;
+    font-size: 28px;
+    font-weight: 750;
+}
+
+.page-header p {
+    color: #8791ad;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ================= ADMIN BOOKINGS CARD ================= */
+
+.recent-admin-booking-card {
+    width: 100%;
+    min-width: 0;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #edf0f8;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(30, 45, 90, 0.05);
+}
+
+.admin-booking-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.admin-booking-card-header h2 {
+    margin: 0;
+    color: #263a72;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* ================= TABLE SCROLL CONTAINER ================= */
+
+.admin-booking-table-scroll {
+    width: 100%;
+    max-height: 420px;
+    overflow-x: auto;
+    overflow-y: auto;
+    border-radius: 8px;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #c4cce2 #f4f6fc;
+}
+
+/* Keep table columns readable on narrow screens */
+.admin-booking-table {
+    width: 100%;
+    min-width: 850px;
+}
+
+/* ================= TABLE HEADINGS ================= */
+
+.admin-booking-table-header,
+.admin-booking-row {
+    display: grid;
+    grid-template-columns: 1.1fr 1.3fr 1fr 1fr 0.8fr;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.admin-booking-table-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 13px 12px;
+    background: #f0f3ff;
+    color: #40558b;
+    font-size: 12px;
+    font-weight: 700;
+    border-bottom: 1px solid #e3e8f7;
+}
+
+/* ================= TABLE ROWS ================= */
+
+.admin-booking-row {
+    min-height: 52px;
+    padding: 14px 12px;
+    border-bottom: 1px solid #edf0f8;
+    color: #526183;
+    font-size: 12px;
+}
+
+.admin-booking-row:nth-child(even) {
+    background: #f9faff;
+}
+
+.admin-booking-row:hover {
+    background: #f0f4ff;
+}
+
+.admin-booking-row:last-child {
+    border-bottom: none;
+}
+
+.admin-booking-row > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* ================= BOOKING STATUS ================= */
+
+.admin-booking-status {
+    display: inline-block;
+    max-width: 100%;
+    padding: 5px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.admin-booking-status.confirmed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-booking-status.pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.admin-booking-status.cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.admin-booking-status.completed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* ================= EMPTY / ERROR MESSAGES ================= */
+
+.admin-booking-message {
+    padding: 28px 14px;
+    color: #8790ad;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* ================= RESPONSIVE LAYOUT ================= */
+
+@media (max-width: 1000px) {
+    .sidebar {
+        width: 220px;
+        padding: 20px 14px;
+    }
+
+    .admin-container {
+        margin-left: 220px;
+        padding: 25px;
+    }
+
+    .recent-admin-booking-card {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        padding: 16px;
+        overflow: visible;
+        border-right: none;
+        border-bottom: 1px solid #e9edf7;
+    }
+
+    .collapse-btn {
+        margin-bottom: 18px;
+    }
+
+    .logo-section {
+        margin-bottom: 18px;
+    }
+
+    .navigation {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .nav-item {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .help-card {
+        margin-top: 20px;
+    }
+
+    .admin-container {
+        width: 100%;
+        margin-left: 0;
+        padding: 20px 14px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+    }
+
+    .recent-admin-booking-card {
+        padding: 16px;
+    }
+
+    .admin-booking-table {
+        min-width: 850px;
+    }
+}
+
+@media (max-width: 420px) {
+    .navigation {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .recent-admin-booking-card {
+        padding: 12px;
+    }
+
+    .admin-booking-card-header h2 {
+        font-size: 18px;
+    }
+}

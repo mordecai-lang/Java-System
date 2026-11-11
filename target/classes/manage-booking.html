@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Bookings | HostelBook</title>
+    <link rel="stylesheet" href="hostel-main-content.css" />
+
+    <link rel="stylesheet" href="manage-booking.css" />
+  </head>
+  <body>
+    <main class="admin-container manage-booking-page">
+      <!-- Page Header -->
+      <div class="page-header">
+        <a href="/admin" class="back-link">
+          <i data-lucide="arrow-left"></i>
+          <span>Back</span>
+        </a>
+        <h1>Manage Bookings</h1>
+        <p>View and manage all hostel bookings.</p>
+      </div>
+
+      <!-- Recent Admin Bookings -->
+      <div class="recent-admin-booking-card">
+        <div class="admin-booking-card-header">
+          <h2>Recent Bookings</h2>
+        </div>
+
+        <div class="admin-booking-table-scroll">
+          <div class="admin-booking-table">
+            <div class="admin-booking-table-header">
+              <span>Room</span>
+              <span>Hostel</span>
+              <span>Check-in</span>
+              <span>Check-out</span>
+              <span>Status</span>
+            </div>
+
+            <div id="recentBookingsBody">
+              <p class="admin-booking-message">Loading recent bookings...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="manage-booking.js"></script>
+    <script src="home.js"></script>
+    <script src="booking-room.js"></script>
+  </body>
+</html>

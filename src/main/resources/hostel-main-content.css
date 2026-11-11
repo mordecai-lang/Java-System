@@ -40,7 +40,7 @@
   margin-bottom: 24px;
   padding: 25px 28px;
   border: 1px solid #eee9ff;
-  border-radius: 16px;
+  border-radius: 5px;
   background: linear-gradient(115deg, #f0edff 0%, #ffffff 72%, #f6f3ff 100%);
 }
 
@@ -760,7 +760,7 @@
       gap: 14px;
       padding: 18px;
       border: 1px solid #e6e9f5;
-      border-radius: 14px;
+      border-radius: 5px;
       background: #fff;
       box-shadow: 0 8px 25px rgba(37, 45, 92, .045);
     }
@@ -777,11 +777,16 @@
     }
 
     .room-summary-icon i { width: 20px; height: 20px; }
-    .room-summary-card p { margin: 0 0 5px; color: #68789d; font-size: 12px; }
+    .room-summary-card p { margin: 0 0 5px; color: #6680be; font-size: 12px; }
     .room-summary-card strong { color: #172449; font-size: 24px; }
 
-    .room-form-card { margin-bottom: 22px; }
-    .room-list-card { padding: 20px 16px 14px; }
+    .room-form-card { 
+      margin-bottom: 22px; 
+      border-radius: 5px;
+      }
+    .room-list-card { padding: 20px 16px 14px;
+      border-radius: 5px;    
+     }
     .room-table { min-width: 850px; }
     .room-table tbody td:nth-child(2) { min-width: 100px; }
     .room-table tbody td:nth-child(4) { min-width: 0; }
@@ -890,7 +895,7 @@
 .booking-panel {
     background: #fff;
     border: 1px solid #e6e9f5;
-    border-radius: 16px;
+    border-radius: 5px;
     box-shadow: 0 8px 25px rgba(37, 45, 92, 0.045);
 }
 
@@ -902,13 +907,14 @@
 .booking-progress-card {
     padding: 20px 22px;
     margin-bottom: 20px;
+    border-radius: 5px;
 }
 
 .booking-progress-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 16px;
 }
 
@@ -927,7 +933,7 @@
 .booking-steps {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    gap: 12px;
     align-items: center;
 }
 

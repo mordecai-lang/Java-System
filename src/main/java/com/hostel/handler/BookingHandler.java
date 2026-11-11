@@ -2,7 +2,7 @@
 package com.hostel.handler;
 
 import com.sun.net.httpserver.HttpExchange;
-
+import com.hostel.SessionManager;
 import com.hostel.service.BookingService;
 import com.hostel.util.FormDataParser;
 import com.hostel.util.ResponseUtil;
@@ -12,6 +12,23 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.DateTimeException;
 import java.util.Map;
+import java.util.List;
+
+import com.hostel.model.Booking;
+import com.hostel.model.UserBooking;
+import com.hostel.util.JsonUtil;
+import com.hostel.util.JsonResponseUtil;
+
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.DateTimeException;
+import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+
+
+import com.hostel.model.AvailableRoom;
 
 public class BookingHandler {
     public static void handleBookRoom(HttpExchange exchange)throws IOException {
@@ -145,9 +162,22 @@ public class BookingHandler {
         // 7. Delegate booking and database checks to the service.
         // The service must calculate checkout and fee using DB data,
         // check overlapping reservations, and insert transactionally.
+        // Check overlapping reservations and insert transactionally.
         try {
-            BookingService.BookingResult result =
-                BookingService.createBooking(
+            SessionManager.UserSession session =
+                SessionManager.getSession(exchange);
+
+            if (session == null) {
+                ResponseUtil.send(
+                exchange, 401,
+                "Please log in to book a room."
+                );
+                return;
+                }
+
+            BookingService.BookingResult result = BookingService.createBooking(
+                    session.getUserId(),
+                    session.getRole(),
                     roomId,
                     checkInDate,
                     stayMonths,
@@ -155,7 +185,7 @@ public class BookingHandler {
                     bookedUnder,
                     email,
                     phone
-                );
+            );
 
             switch (result) {
                 case CREATED:
@@ -216,4 +246,121 @@ public class BookingHandler {
     private static String firstNonBlank(String first, String second) {
         return !isBlank(first) ? first : second;
     }
+
+      //Admin Viewing Bookings
+    public static void handleViewRecentBookings(HttpExchange exchange) throws IOException {
+      if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
+        ResponseUtil.send(exchange, 405, "Accepting only GET");
+        return;
+      }
+      List<Booking> bookings = BookingService.getLatestBookings();
+
+      String json = JsonUtil.bookingsToJson(bookings);
+      JsonResponseUtil.send(exchange, 200, json);
+    }
+
+     
+    // User Viewing Their Own Bookings
+    public static void handleViewActualRecentBookings(
+            HttpExchange exchange) throws IOException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
+            ResponseUtil.send(exchange, 405, "Accepting only GET");
+            return;
+        }
+        SessionManager.UserSession session = SessionManager.getSession(exchange);
+        if (session == null) {
+            ResponseUtil.send(exchange, 401, "Please log in first.");
+            return;
+        }
+        int userId = session.getUserId();
+
+        List<UserBooking> userBookings =BookingService.getLatestUserBookings(userId);
+        
+        String json = JsonUtil.userBookingsToJson(userBookings);
+        JsonResponseUtil.send(exchange, 200, json);
+        
+        }
+
+        // User viewing rooms available for their selected booking dates
+public static void handleAvailableBookingRooms(
+        HttpExchange exchange) throws IOException {
+
+    if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
+        ResponseUtil.send(exchange, 405, "Accepting only GET");
+        return;
+    }
+
+    try {
+        // 1. Read query parameters from the URL
+        String query = exchange.getRequestURI().getRawQuery();
+
+        if (query == null || query.isBlank()) {
+            ResponseUtil.send(exchange, 400,
+                    "Missing checkInDate and stayMonths.");
+            return;
+        }
+
+        Map<String, String> params = new HashMap<>();
+
+        for (String pair : query.split("&")) {
+            String[] parts = pair.split("=", 2);
+
+            String key = URLDecoder.decode(
+                    parts[0], StandardCharsets.UTF_8);
+
+            String value = parts.length > 1
+                    ? URLDecoder.decode(parts[1], StandardCharsets.UTF_8)
+                    : "";
+
+            params.put(key, value);
+        }
+
+        // 2. Extract the booking dates
+        String checkInValue = params.get("checkInDate");
+        String stayMonthsValue = params.get("stayMonths");
+
+        if (isBlank(checkInValue) || isBlank(stayMonthsValue)) {
+            ResponseUtil.send(exchange, 400,
+                    "checkInDate and stayMonths are required.");
+            return;
+        }
+
+        LocalDate checkInDate = LocalDate.parse(checkInValue);
+        int stayMonths = Integer.parseInt(stayMonthsValue);
+
+        if (stayMonths < 1 || stayMonths > 12) {
+            ResponseUtil.send(exchange, 400,
+                    "Stay duration must be between 1 and 12 months.");
+            return;
+        }
+
+        if (checkInDate.isBefore(LocalDate.now())) {
+            ResponseUtil.send(exchange, 400,
+                    "Check-in date cannot be in the past.");
+            return;
+        }
+
+        // 3. Calculate checkout date
+        LocalDate checkOutDate = checkInDate.plusMonths(stayMonths);
+
+        // 4. Ask BookingService for rooms available during this period
+        List<AvailableRoom> availableRooms =
+                BookingService.getAvailableBookingRooms(
+                        checkInDate, checkOutDate);
+
+        // 5. Return the available rooms as JSON
+        String json = JsonUtil.availableRoomsToJson(availableRooms);
+
+        JsonResponseUtil.send(exchange, 200, json);
+
+    } catch (DateTimeParseException | NumberFormatException e) {
+        ResponseUtil.send(exchange, 400,
+                "Invalid check-in date or stay duration.");
+
+    } catch (DateTimeException e) {
+        ResponseUtil.send(exchange, 400,
+                "Invalid booking date range.");
+    }
+}
+
 }

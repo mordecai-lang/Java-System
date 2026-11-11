@@ -6,7 +6,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background: #f4f7fb;
+    background: #f8f9ff;
     color: #1e293b;
 }
 
@@ -25,6 +25,35 @@ body {
    Page Header
 ========================= */
 
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: #0b0645;
+    background: #34f42e;
+    border: 1px solid #e2defe;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.back-link svg {
+    width: 18px;
+    height: 18px;
+}
+
+.back-link:hover {
+    color: #ffffff;
+    background: #0f7622;
+    border-color: #216e5b;
+    transform: translateX(-2px);
+}
+
+
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -34,7 +63,7 @@ body {
 
 .page-header h1 {
     font-size: 30px;
-    color: #123b70;
+    color: #17205c;
     margin-bottom: 6px;
 }
 
@@ -57,17 +86,26 @@ button {
 }
 
 #addUserBtn {
-    background: #2563eb;
+    background: #1a166b;
     color: white;
     padding: 12px 20px;
     border-radius: 8px;
 }
 
 #addUserBtn:hover {
-    background: #1d4ed8;
+    background: #1e0c68;
 }
 
+.addBtn {
+    background: #166b26;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+}
 
+.addBtn:hover {
+    background: #215a15;
+}
 /* =========================
    Statistics
 ========================= */
@@ -82,7 +120,7 @@ button {
 .stat-card {
     background: white;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 22px;
     box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
 }
@@ -245,7 +283,7 @@ tbody tr:hover {
 .action-card {
     background: white;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 25px;
     box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
 }
@@ -311,14 +349,14 @@ tbody tr:hover {
 
 #addUserForm button {
     width: fit-content;
-    background: #2563eb;
+    background: #24d232;
     color: white;
     padding: 11px 20px;
     border-radius: 7px;
 }
 
 #addUserForm button:hover {
-    background: #1d4ed8;
+    background: #0ba44d;
 }
 
 
@@ -326,7 +364,7 @@ tbody tr:hover {
 
 .remove-btn {
     width: fit-content;
-    background: #dc2626;
+    background: #de4747;
     color: white;
     padding: 11px 20px;
     border-radius: 7px;
@@ -369,7 +407,7 @@ tbody tr:hover {
 .users-section {
     background: white;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 25px;
     box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
 }

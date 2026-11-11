@@ -1,7 +1,7 @@
 package com.hostel.handler;
 
 import com.sun.net.httpserver.HttpExchange;
-
+import com.hostel.SessionManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,7 +42,14 @@ public class AdminHandler{
     String password = data.get("password");
     String role = data.get("role");
 
-    boolean success = AdminService.adduser(name,email, password, role);
+    SessionManager.UserSession session = SessionManager.getSession(exchange);
+    if (session == null || !"ADMIN".equals(session.getRole())) {
+      ResponseUtil.send(exchange, 403, "Admin access required.");
+    return;
+    }
+    
+    
+    boolean success = AdminService.adduser(name, email, password, role, session.getRole());
 
     String response;
     int statusCode;
@@ -70,7 +77,14 @@ public class AdminHandler{
 
     String email = data.get("removeUserEmail");
     System.out.println("Email received for deletion: [" + email + "]");
-    boolean success = AdminService.removeuser(email);
+    
+    SessionManager.UserSession session = SessionManager.getSession(exchange);
+
+    if (session == null || !"ADMIN".equals(session.getRole())) {
+        ResponseUtil.send(exchange, 403, "Admin access required.");
+    return;}
+    
+    boolean success = AdminService.removeuser(email, session.getRole());
 
     String response;
     int statusCode;
@@ -113,7 +127,13 @@ public class AdminHandler{
     String location = data.get("location");
     String description = data.get("description");
    
-    boolean success = AdminService.addHostel(hostelName, location, description);
+    SessionManager.UserSession session = SessionManager.getSession(exchange);
+    if (session == null || !"ADMIN".equals(session.getRole())) {
+      ResponseUtil.send(exchange, 403, "Admin access required.");
+      return;
+    }
+    
+    boolean success = AdminService.addHostel(hostelName, location, description, session.getRole());
 
     String response;
     int statusCode;
@@ -206,7 +226,14 @@ public class AdminHandler{
 
 
         // 5. Call the service to save the room
-        boolean success = AdminService.addRoom(hostelId,roomNumber.trim(),totalBeds,roomType,accommodationFee,status);
+        SessionManager.UserSession session = SessionManager.getSession(exchange);
+
+        if (session == null || !"ADMIN".equals(session.getRole())) {
+          ResponseUtil.send(exchange, 403, "Admin access required.");
+          return;
+        }
+        
+        boolean success = AdminService.addRoom(hostelId, roomNumber, totalBeds,roomType, accommodationFee, status,session.getRole());
 
         if (success) {
             ResponseUtil.send(exchange, 201, "Room added successfully!");

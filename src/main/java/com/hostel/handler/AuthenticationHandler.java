@@ -1,6 +1,7 @@
 package com.hostel.handler;
-
+import com.hostel.SessionManager;
 import com.sun.net.httpserver.HttpExchange;
+import com.hostel.LoginResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,45 +43,34 @@ public class AuthenticationHandler {
         ResponseUtil.send(exchange, statusCode, response);
     }
 
-
     public static void handleLogin(HttpExchange exchange) throws IOException {
-        System.out.println("handleLogin was called");
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            String response = "Accepting only POST";
-            ResponseUtil.send(exchange, 405, response);
+            ResponseUtil.send(exchange, 405, "Accepting only POST");
             return;
         }
-       
+
         InputStream input = exchange.getRequestBody();
-       
         String body = new String(input.readAllBytes(), StandardCharsets.UTF_8);
         Map<String, String> data = FormDataParser.parse(body);
 
         String email = data.get("email");
         String password = data.get("password");
 
-        System.out.println("About to check login");
+        LoginResult loginResult = AuthenticationService.login(email, password);
 
-        boolean success = AuthenticationService.login(email, password);
-        System.out.println("Login check completed: " + success);
-        
-        String response;
-        int statusCode;
-        if (success) {
-            if (AuthenticationService.getCurrentRole().equals("ADMIN")) {
-                response = "ADMIN";
-            } else {
-                response = "USER";
-            }
-            statusCode = 200;
-
-        } else {
-            response = "Invalid email or password!";
-            statusCode = 401;
+        if (loginResult == null) {
+            ResponseUtil.send(exchange, 401, "Invalid email or password!");
+            return;
         }
 
-        System.out.println("Response: " + response);
-        System.out.println("Status code: " + statusCode);
-        ResponseUtil.send(exchange, statusCode, response);
+        // Send this user's session ID to the browser.
+        SessionManager.sendSessionCookie(exchange, loginResult.getSessionId());
+
+        String response = loginResult.getRole().equals("ADMIN")
+            ? "ADMIN"
+            : "USER";
+
+        ResponseUtil.send(exchange, 200, response);
     }
+
 }

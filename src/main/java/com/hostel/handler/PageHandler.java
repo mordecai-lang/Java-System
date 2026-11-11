@@ -1,6 +1,8 @@
+
 package com.hostel.handler;
 
-import com.hostel.service.AuthenticationService;
+import com.hostel.SessionManager;
+import com.hostel.SessionManager.UserSession;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
@@ -14,6 +16,11 @@ public class PageHandler {
         String path = exchange.getRequestURI().getPath();
         String fileName;
 
+        UserSession session = SessionManager.getSession(exchange);
+        boolean authenticated = session != null;
+        boolean isAdmin = authenticated
+                && "ADMIN".equals(session.getRole());
+
         if (path.equals("/")) {
             fileName = "index.html";
 
@@ -21,78 +28,66 @@ public class PageHandler {
             fileName = "register.html";
 
         } else if (path.equals("/home")) {
+            fileName = authenticated ? "home.html" : "index.html";
 
-            if (AuthenticationService.isAuthenticated()) {
-                fileName = "home.html";
-            } else {
-                fileName = "index.html";
-            }
+        } else if (path.equals("/book-rooms")) {
+            fileName = authenticated ? "book-rooms.html" : "index.html";
 
-        }else if (path.equals("/book-rooms")){
-            if (AuthenticationService.isAuthenticated()) {
-                fileName = "book-rooms.html";
-            } else {
-                fileName = "index.html";
-            }
-        }else if (path.equals("/admin")) {
+        } else if (path.equals("/admin")) {
+            fileName = isAdmin ? "admin.html" : "index.html";
 
-            if (AuthenticationService.isAuthenticated()
-                    && AuthenticationService.getCurrentRole().equals("ADMIN")) {
-
-                fileName = "admin.html";
-
-            } else {
-                fileName = "index.html";
-            }
         } else if (path.equals("/users")) {
-            if (AuthenticationService.isAuthenticated() && AuthenticationService.getCurrentRole().equals("ADMIN")) {
-                fileName = "users.html";
-            } else {
-                fileName = "index.html";
-            }
-        }else if (path.equals("/rooms")) {
-            if (AuthenticationService.isAuthenticated() && AuthenticationService.getCurrentRole().equals("ADMIN")) {
-                fileName = "rooms.html";
-            } else {
-                    fileName = "index.html";
-            }
-        }else if (path.equals("/hostels")) {
-            if (AuthenticationService.isAuthenticated() && AuthenticationService.getCurrentRole().equals("ADMIN")) {
-                fileName = "hostels.html";
-            } else {
-                fileName = "index.html";
-            }
+            fileName = isAdmin ? "users.html" : "index.html";
+
+        } else if (path.equals("/rooms")) {
+            fileName = isAdmin ? "rooms.html" : "index.html";
+
+        } else if (path.equals("/hostels")) {
+            fileName = isAdmin ? "hostels.html" : "index.html";
+
+        } else if (path.equals("/manage-booking")) {
+            fileName = isAdmin ? "manage-booking.html" : "index.html";
+
         } else {
             fileName = path.substring(1);
+        }
+
+        try (InputStream input =
+                     PageHandler.class.getClassLoader()
+                             .getResourceAsStream(fileName)) {
+
+            if (input == null) {
+                byte[] response = "404 Not Found".getBytes();
+
+                exchange.sendResponseHeaders(404, response.length);
+
+                try (OutputStream output = exchange.getResponseBody()) {
+                    output.write(response);
+                }
+
+                return;
             }
-        
 
-        InputStream input = PageHandler.class.getClassLoader().getResourceAsStream(fileName);
-        if (input == null) {
-            String response = "404 Not Found";
-            exchange.sendResponseHeaders(404,response.getBytes().length);
+            byte[] file = input.readAllBytes();
 
-            OutputStream output = exchange.getResponseBody();
-            output.write(response.getBytes());
-            output.close();
+            if (fileName.endsWith(".html")) {
+                exchange.getResponseHeaders().set(
+                        "Content-Type", "text/html; charset=UTF-8");
 
-            return;
+            } else if (fileName.endsWith(".css")) {
+                exchange.getResponseHeaders().set(
+                        "Content-Type", "text/css; charset=UTF-8");
+
+            } else if (fileName.endsWith(".js")) {
+                exchange.getResponseHeaders().set(
+                        "Content-Type", "application/javascript; charset=UTF-8");
+            }
+
+            exchange.sendResponseHeaders(200, file.length);
+
+            try (OutputStream output = exchange.getResponseBody()) {
+                output.write(file);
+            }
         }
-
-        byte[] file = input.readAllBytes();
-
-        if (fileName.endsWith(".html")) {
-            exchange.getResponseHeaders().set("Content-Type", "text/html");
-
-        } else if (fileName.endsWith(".css")) {
-            exchange.getResponseHeaders().set("Content-Type", "text/css");
-
-        } else if (fileName.endsWith(".js")) {
-            exchange.getResponseHeaders().set("Content-Type", "application/javascript");
-        }
-        exchange.sendResponseHeaders(200, file.length);
-        OutputStream output = exchange.getResponseBody();
-        output.write(file);
-        output.close();
     }
 }

@@ -24,14 +24,15 @@
 
     const HOSTELS_ENDPOINT = `${API_BASE}/adminViewHostels`;
     const ROOMS_ENDPOINT = `${API_BASE}/adminViewRooms`;
-
+    const AVAILABLE_ROOMS_ENDPOINT =`${API_BASE}/availableBookingRooms`;
+    
     let currentStep = 1;
     let hostels = [];
     let rooms = [];
     let selectedHostel = null;
     let selectedRoom = null;
     let toastTimer;
-
+    let bookingAvailableRooms = [];
     const $ = (id) => document.getElementById(id);
 
     const stepPanels = [
@@ -121,7 +122,8 @@
     function getAvailableRooms(hostelId) {
         return rooms.filter(room =>
             roomHostelId(room) === Number(hostelId) &&
-            roomStatus(room) === "AVAILABLE"
+            roomStatus(room) === "AVAILABLE" &&
+            Number(room.remainingBeds) > 0
         );
     }
 
@@ -654,6 +656,8 @@ function goToStep(step) {
     }
 }
 
+    
+
     // -----------------------------------------------------
     // 11. INITIALIZE THE PAGE
     // -----------------------------------------------------
@@ -682,15 +686,20 @@ function goToStep(step) {
 
         wireReviewUpdates();
 
-        $("nextBtn").addEventListener("click", async () => {
+         
+    // Navigate between booking steps.
+    $("nextBtn").addEventListener("click", async () => {
     if (!validateStep(currentStep)) return;
 
+    // Step 1 -> Step 2 -> Step 3
     if (currentStep < 3) {
         goToStep(currentStep + 1);
         return;
     }
 
-    if (currentStep === 3) {
+        // Step 3 -> Submit booking -> Step 4
+        if (currentStep === 3) {
+
         if (!selectedRoom) {
             showToast("Please select a room.");
             return;
@@ -703,30 +712,35 @@ function goToStep(step) {
         } finally {
             $("nextBtn").disabled = false;
         }
-    }
-});
+        }
+        });
 
+        // Navigate backwards between booking steps.
         $("backBtn").addEventListener("click", () => {
             if (currentStep > 1) {
                 goToStep(currentStep - 1);
             }
         });
 
+        // Collapse or expand the sidebar.
         $("collapseBtn")?.addEventListener("click", () => {
             document
                 .querySelector(".booking-layout > .sidebar")
                 ?.classList.toggle("collapsed");
         });
 
+        // Support button placeholder.
         $("supportBtn")?.addEventListener("click", () => {
             showToast(
                 "Support contact has not been connected yet."
             );
         });
 
+        // Start at Step 1 and load booking information.
         goToStep(1);
         loadBookingData();
 
+        // Initialize Lucide icons.
         if (window.lucide) {
             window.lucide.createIcons();
         }

@@ -752,20 +752,14 @@ body {
 }
 
 
-
 /* ================= BOTTOM ================= */
 
 .bottom-grid {
-
     display: grid;
-
-    grid-template-columns: 2fr 1fr;
-
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 20px;
+    align-items: stretch;
 }
-
-
-
 /* Recent bookings */
 
 .recent-card {
@@ -804,56 +798,6 @@ body {
 }
 
 
-.booking-table {
-
-    width: 100%;
-}
-
-
-.table-header,
-.booking-row {
-
-    display: grid;
-
-    grid-template-columns:
-        1.1fr
-        1.3fr
-        1fr
-        1fr
-        .8fr;
-
-    align-items: center;
-
-    gap: 10px;
-}
-
-
-.table-header {
-
-    background: #f5f6ff;
-
-    padding: 11px;
-
-    border-radius: 8px;
-
-    font-size: 12px;
-
-    font-weight: bold;
-
-    color: #40558b;
-}
-
-
-.booking-row {
-
-    padding: 14px 10px;
-
-    border-bottom: 1px solid #eeeeff;
-
-    font-size: 13px;
-
-    color: #263a72;
-}
 
 
 .status {
@@ -885,6 +829,69 @@ body {
     color: #e48a00;
 }
 
+
+/* Scrollable recent bookings table */
+
+/* Only the bookings table on the Manage Bookings page */
+.booking-table-scroll {
+    width: 100%;
+    max-height: 320px;
+    overflow: auto;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.booking-table {
+    width: 100%;
+    min-width: 850px;
+    box-sizing: border-box;
+}
+
+
+
+/* Shared column widths: headings and data always align */
+.table-header,
+.booking-row {
+    display: grid;
+    grid-template-columns: 1.1fr 1.3fr 1fr 1fr 0.8fr;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.table-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f5f6ff;
+    padding: 11px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #40558b;
+}
+
+.booking-row {
+    padding: 14px 12px;
+    border-bottom: 1px solid #edf0f8;
+    font-size: 12px;
+    color: #263a72;
+}
+
+.booking-row:nth-child(even) {
+    background: #f8f9fd;
+}
+
+.booking-row:last-child {
+    border-bottom: none;
+}
+
+.booking-message {
+    padding: 22px 14px;
+    color: #8790ad;
+    font-size: 13px;
+    text-align: center;
+}
 
 
 /* Explore card */
@@ -1409,7 +1416,16 @@ border-radius: 1px ;
         grid-template-columns: 1fr;
     }
 }
+@media (max-width: 768px) {
+    .bottom-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
 
+    .recent-card,
+    .explore-card {
+        min-width: 0;
+    }
+}
 
 @media (max-width: 750px) {
 

@@ -11,6 +11,16 @@ import java.sql.Date;
 import java.sql.Statement;
 import java.time.LocalDate;
 
+import java.time.LocalDate;
+import java.util.List;
+import com.hostel.model.AvailableRoom;
+import com.hostel.dao.HostelsAndRoomsDAO;
+
+import com.hostel.dao.HostelsAndRoomsDAO;
+import com.hostel.model.Booking;
+import com.hostel.model.UserBooking;
+import java.util.List;
+
 public class BookingService {
 
     // Use the same database and credentials as your existing DAO.
@@ -31,22 +41,20 @@ public class BookingService {
     }
 
     public static BookingResult createBooking(
-            int roomId,
-            LocalDate checkInDate,
-            int stayMonths,
-            int occupants,
-            String bookedUnder,
-            String email,
-            String phone
-    ) throws SQLException {
+        int userId,
+        String role,
+        int roomId,
+        LocalDate checkInDate,
+        int stayMonths,
+        int occupants,
+        String bookedUnder,
+        String email,
+        String phone
+        ) throws SQLException {
 
-        // 1. Authentication checks.
-        if (!AuthenticationService.isAuthenticated()) {
+        if (userId <= 0) {
             throw new SecurityException("Login is required to book a room.");
         }
-
-        String role = AuthenticationService.getCurrentRole();
-
         if (role == null || role.isBlank()) {
             throw new SecurityException("Unable to verify the user's role.");
         }
@@ -188,11 +196,11 @@ public class BookingService {
                  * 8. Insert the booking.
                  * Payment has NOT been made at this stage.
                  */
-                String insertSql ="INSERT INTO bookings (" +
-                               "room_id, booked_under, email, phone, " +
-                               "check_in_date, check_out_date, stay_months, " +
-                               "occupants, accommodation_fee, booking_status, payment_status" +
-                                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'PENDING')";
+                String insertSql = "INSERT INTO bookings (" +
+        "user_id, room_id, booked_under, email, phone, " +
+        "check_in_date, check_out_date, stay_months, " +
+        "occupants, accommodation_fee, booking_status, payment_status" +
+        ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'PENDING')";
 
                 try (PreparedStatement ps =
                              conn.prepareStatement(
@@ -200,15 +208,16 @@ public class BookingService {
                                      Statement.RETURN_GENERATED_KEYS
                              )) {
 
-                    ps.setInt(1, roomId);
-                    ps.setString(2, bookedUnder.trim());
-                    ps.setString(3, email.trim());
-                    ps.setString(4, phone.trim());
-                    ps.setDate(5, Date.valueOf(checkInDate));
-                    ps.setDate(6, Date.valueOf(checkOutDate));
-                    ps.setInt(7, stayMonths);
-                    ps.setInt(8, occupants);
-                    ps.setBigDecimal(9, totalFee);
+                    ps.setInt(1, userId);
+                    ps.setInt(2, roomId);
+                    ps.setString(3, bookedUnder.trim());
+                    ps.setString(4, email.trim());
+                    ps.setString(5, phone.trim());
+                    ps.setDate(6, Date.valueOf(checkInDate));
+                    ps.setDate(7, Date.valueOf(checkOutDate));
+                    ps.setInt(8, stayMonths);
+                    ps.setInt(9, occupants);
+                    ps.setBigDecimal(10, totalFee);
 
                     int rowsInserted = ps.executeUpdate();
 
@@ -237,4 +246,21 @@ public class BookingService {
     private static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
+    
+    public static List<Booking> getLatestBookings() {
+        return HostelsAndRoomsDAO.getLatestBookings();
+    }
+    
+     
+    // Users view their own recent bookings
+    public static List<UserBooking> getLatestUserBookings(int userId) {
+        return HostelsAndRoomsDAO.getLatestUserBookings(userId);
+    }
+
+
+    public static List<AvailableRoom> getAvailableBookingRooms(LocalDate checkInDate,LocalDate checkOutDate) {
+    return HostelsAndRoomsDAO.getAvailableBookingRooms(checkInDate,checkOutDate);
+    
+    }
+
 }
