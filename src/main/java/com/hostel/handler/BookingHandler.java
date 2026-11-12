@@ -282,85 +282,156 @@ public class BookingHandler {
         }
 
         // User viewing rooms available for their selected booking dates
-public static void handleAvailableBookingRooms(
-        HttpExchange exchange) throws IOException {
+        public static void handleAvailableBookingRooms(HttpExchange exchange)
+        throws IOException {
+
+    System.out.println(
+        "DEBUG: /availableBookingRooms endpoint was requested!"
+    );
 
     if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
-        ResponseUtil.send(exchange, 405, "Accepting only GET");
+        ResponseUtil.send(exchange, 405, "Only GET requests are accepted.");
         return;
     }
 
     try {
-        // 1. Read query parameters from the URL
+
+        LocalDate checkInDate;
+        LocalDate checkOutDate;
+
         String query = exchange.getRequestURI().getRawQuery();
 
+        // -------------------------------------------------
+        // CASE 1: Initial page load - no query parameters.
+        // Check availability for today.
+        // -------------------------------------------------
+
         if (query == null || query.isBlank()) {
-            ResponseUtil.send(exchange, 400,
-                    "Missing checkInDate and stayMonths.");
-            return;
-        }
 
-        Map<String, String> params = new HashMap<>();
+            checkInDate = LocalDate.now();
+            checkOutDate = checkInDate.plusDays(1);
 
-        for (String pair : query.split("&")) {
-            String[] parts = pair.split("=", 2);
+            System.out.println(
+                "Checking current room availability: "
+                + checkInDate + " to " + checkOutDate
+            );
 
-            String key = URLDecoder.decode(
-                    parts[0], StandardCharsets.UTF_8);
+        } else {
 
-            String value = parts.length > 1
-                    ? URLDecoder.decode(parts[1], StandardCharsets.UTF_8)
+            // -------------------------------------------------
+            // CASE 2: User selected booking dates.
+            // -------------------------------------------------
+
+            Map<String, String> params = new HashMap<>();
+
+            for (String pair : query.split("&")) {
+
+                String[] parts = pair.split("=", 2);
+
+                String key = URLDecoder.decode(
+                    parts[0],
+                    StandardCharsets.UTF_8
+                );
+
+                String value = parts.length > 1
+                    ? URLDecoder.decode(
+                        parts[1],
+                        StandardCharsets.UTF_8
+                    )
                     : "";
 
-            params.put(key, value);
+                params.put(key, value);
+            }
+
+            String checkInValue = params.get("checkInDate");
+            String stayMonthsValue = params.get("stayMonths");
+
+            if (checkInValue == null || checkInValue.isBlank()
+                    || stayMonthsValue == null
+                    || stayMonthsValue.isBlank()) {
+
+                ResponseUtil.send(
+                    exchange,
+                    400,
+                    "checkInDate and stayMonths are required together."
+                );
+                return;
+            }
+
+            checkInDate = LocalDate.parse(checkInValue);
+
+            int stayMonths = Integer.parseInt(stayMonthsValue);
+
+            if (stayMonths < 1 || stayMonths > 12) {
+                ResponseUtil.send(
+                    exchange,
+                    400,
+                    "Stay duration must be between 1 and 12 months."
+                );
+                return;
+            }
+
+            if (checkInDate.isBefore(LocalDate.now())) {
+                ResponseUtil.send(
+                    exchange,
+                    400,
+                    "Check-in date cannot be in the past."
+                );
+                return;
+            }
+
+            checkOutDate = checkInDate.plusMonths(stayMonths);
+
+            System.out.println(
+                "Checking date-specific availability: "
+                + checkInDate + " to " + checkOutDate
+            );
         }
 
-        // 2. Extract the booking dates
-        String checkInValue = params.get("checkInDate");
-        String stayMonthsValue = params.get("stayMonths");
+        // -------------------------------------------------
+        // GET AVAILABLE ROOMS FROM THE EXISTING SERVICE.
+        // -------------------------------------------------
 
-        if (isBlank(checkInValue) || isBlank(stayMonthsValue)) {
-            ResponseUtil.send(exchange, 400,
-                    "checkInDate and stayMonths are required.");
-            return;
-        }
-
-        LocalDate checkInDate = LocalDate.parse(checkInValue);
-        int stayMonths = Integer.parseInt(stayMonthsValue);
-
-        if (stayMonths < 1 || stayMonths > 12) {
-            ResponseUtil.send(exchange, 400,
-                    "Stay duration must be between 1 and 12 months.");
-            return;
-        }
-
-        if (checkInDate.isBefore(LocalDate.now())) {
-            ResponseUtil.send(exchange, 400,
-                    "Check-in date cannot be in the past.");
-            return;
-        }
-
-        // 3. Calculate checkout date
-        LocalDate checkOutDate = checkInDate.plusMonths(stayMonths);
-
-        // 4. Ask BookingService for rooms available during this period
         List<AvailableRoom> availableRooms =
-                BookingService.getAvailableBookingRooms(
-                        checkInDate, checkOutDate);
+            BookingService.getAvailableBookingRooms(
+                checkInDate,
+                checkOutDate
+            );
 
-        // 5. Return the available rooms as JSON
         String json = JsonUtil.availableRoomsToJson(availableRooms);
 
         JsonResponseUtil.send(exchange, 200, json);
 
+        System.out.println(
+            "Available rooms returned: " + availableRooms.size()
+        );
+
     } catch (DateTimeParseException | NumberFormatException e) {
-        ResponseUtil.send(exchange, 400,
-                "Invalid check-in date or stay duration.");
+
+        ResponseUtil.send(
+            exchange,
+            400,
+            "Invalid check-in date or stay duration."
+        );
 
     } catch (DateTimeException e) {
-        ResponseUtil.send(exchange, 400,
-                "Invalid booking date range.");
+
+        ResponseUtil.send(
+            exchange,
+            400,
+            "Invalid booking date range."
+        );
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        ResponseUtil.send(
+            exchange,
+            500,
+            "Could not retrieve available rooms."
+        );
     }
-}
+    }
 
 }

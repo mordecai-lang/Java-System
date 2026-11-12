@@ -251,7 +251,7 @@ public class HostelsAndRoomsDAO {
         LocalDate checkOutDate) {
 
     List<AvailableRoom> availableRooms = new ArrayList<>();
-
+    System.out.println("DEBUG: getAvailableBookingRooms() method was called!");
     String sql = """
         SELECT
             r.id,

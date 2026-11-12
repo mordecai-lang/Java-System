@@ -32,7 +32,11 @@
     let selectedHostel = null;
     let selectedRoom = null;
     let toastTimer;
+
     let bookingAvailableRooms = [];
+    let availabilityLoaded = false;
+    let availabilityRequestId = 0;
+    
     const $ = (id) => document.getElementById(id);
 
     const stepPanels = [
@@ -120,11 +124,12 @@
     // Only rooms marked AVAILABLE are displayed.
     // This does not replace checking actual booking occupancy.
     function getAvailableRooms(hostelId) {
-        return rooms.filter(room =>
-            roomHostelId(room) === Number(hostelId) &&
-            roomStatus(room) === "AVAILABLE" &&
-            Number(room.remainingBeds) > 0
-        );
+
+    return bookingAvailableRooms.filter(room =>
+        roomHostelId(room) === Number(hostelId) &&
+        roomStatus(room) === "AVAILABLE" &&
+        Number(room.remainingBeds) > 0
+    );
     }
 
     // -----------------------------------------------------
@@ -132,52 +137,182 @@
     // -----------------------------------------------------
 
     async function loadBookingData() {
-        const hostelContainer = $("categoryScroll");
 
-        if (hostelContainer) {
-            hostelContainer.textContent = "Loading available hostels...";
-        }
+    const hostelContainer = $("categoryScroll");
 
-        $("roomSelect").disabled = true;
+    if (hostelContainer) {
+        hostelContainer.textContent = "Loading available hostels...";
+    }
 
-        try {
-            const [hostelData, roomData] = await Promise.all([
-                fetchJson(HOSTELS_ENDPOINT),
-                fetchJson(ROOMS_ENDPOINT)
-            ]);
+    $("roomSelect").disabled = true;
 
-            if (!Array.isArray(hostelData) ||
-                !Array.isArray(roomData)) {
-                throw new Error(
-                    "The Java endpoints must return JSON arrays."
-                );
-            }
+    try {
 
-            hostels = hostelData;
-            rooms = roomData;
+        // Fetch hostel details and CURRENT room availability.
+        const [hostelData, availableRoomData] = await Promise.all([
 
-            renderHostels();
+            fetchJson(HOSTELS_ENDPOINT),
 
-            $("availabilityMessage").textContent = hostels.length
-                ? "Select a hostel to view its available rooms."
-                : "No hostels were returned by the server.";
+            // No query parameters means check current availability.
+            fetchJson(AVAILABLE_ROOMS_ENDPOINT)
 
-        } catch (error) {
-            console.error("Booking data loading failed:", error);
+        ]);
 
-            if (hostelContainer) {
-                hostelContainer.textContent =
-                    "Could not load hostels. Check the Java endpoints.";
-            }
+        if (!Array.isArray(hostelData) ||
+            !Array.isArray(availableRoomData)) {
 
-            $("availabilityMessage").textContent =
-                "Unable to load hostel data. Check your server connection.";
-
-            showToast(
-                "Could not load hostel and room data from Java."
+            throw new Error(
+                "The Java endpoints must return JSON arrays."
             );
         }
+
+        hostels = hostelData;
+
+        // Store rooms returned by the dedicated availability endpoint.
+        bookingAvailableRooms = availableRoomData;
+
+        availabilityLoaded = true;
+
+        // Display hostel cards using actual available rooms.
+        renderHostels();
+
+        $("availabilityMessage").textContent = hostels.length
+            ? "Select a hostel to view its available rooms."
+            : "No hostels were returned by the server.";
+
+        console.log(
+            "Current available booking rooms:",
+            bookingAvailableRooms
+        );
+
+    } catch (error) {
+
+        console.error("Booking data loading failed:", error);
+
+        if (hostelContainer) {
+            hostelContainer.textContent =
+                "Could not load hostels. Check the Java endpoints.";
+        }
+
+        $("availabilityMessage").textContent =
+            "Unable to load hostel availability.";
+
+        showToast(
+            "Could not load hostel availability from Java."
+        );
     }
+}
+
+    // -----------------------------------------------------
+// CHECK DATE-BASED ROOM AVAILABILITY
+// -----------------------------------------------------
+
+    async function refreshBookingAvailability() {
+
+    const checkInDate = $("checkIn").value;
+    const stayMonths = Number($("stayMonths").value);
+
+    const requestId = ++availabilityRequestId;
+
+    // Both dates and duration are required by the Java endpoint.
+    if (!checkInDate || !stayMonths) {
+        availabilityLoaded = false;
+        bookingAvailableRooms = [];
+
+        renderHostels($("roomSearch").value);
+
+        return;
+    }
+
+    try {
+
+        $("availabilityMessage").textContent =
+            "Checking room availability for your selected dates...";
+
+        const params = new URLSearchParams({
+            checkInDate: checkInDate,
+            stayMonths: String(stayMonths)
+        });
+
+        const url =
+            `${AVAILABLE_ROOMS_ENDPOINT}?${params.toString()}`;
+
+        console.log("Requesting availability:", url);
+
+        const availableRooms = await fetchJson(url);
+
+        // Ignore an older request if the user has changed dates again.
+        if (requestId !== availabilityRequestId) return;
+
+        if (!Array.isArray(availableRooms)) {
+            throw new Error(
+                "Availability endpoint did not return an array."
+            );
+        }
+
+        bookingAvailableRooms = availableRooms;
+        availabilityLoaded = true;
+
+        console.log(
+            "Rooms returned by Java:",
+            bookingAvailableRooms
+        );
+
+        // Refresh hostel card counts.
+        renderHostels($("roomSearch").value);
+
+        // Refresh the selected hostel's room dropdown.
+        if (selectedHostel) {
+
+            const hostelId = selectedHostel.id;
+
+            if (getAvailableRooms(hostelId).length > 0) {
+
+                selectHostel(hostelId);
+
+            } else {
+
+                selectedHostel = null;
+                selectedRoom = null;
+
+                $("hostelSelect").value = "";
+
+                $("roomSelect").replaceChildren(
+                    new Option("Choose a hostel first", "")
+                );
+
+                $("roomSelect").disabled = true;
+
+                $("roomTypeDisplay").value = "";
+                $("accommodationFeeDisplay").value = "";
+
+                $("availabilityMessage").textContent =
+                    "This hostel has no available rooms for your selected dates.";
+
+            }
+        } else {
+
+            $("availabilityMessage").textContent =
+                availableRooms.length > 0
+                    ? "Select a hostel to view its available rooms."
+                    : "No rooms are available for your selected dates.";
+        }
+
+    } catch (error) {
+
+        if (requestId !== availabilityRequestId) return;
+
+            console.error(
+                "Room availability request failed:",
+                error
+            );
+
+            $("availabilityMessage").textContent =
+                "Could not check room availability. Please try again.";
+
+        }
+    }
+
 
     // -----------------------------------------------------
     // 4. DISPLAY HOSTEL CARDS
@@ -248,10 +383,8 @@
                 description.textContent = hostel.description;
                 card.append(description);
             }
-
-            // Prevent selection if no rooms are marked AVAILABLE.
+            // Prevent selection if no rooms have available beds for the checked period.
             card.disabled = available.length === 0;
-
             card.addEventListener("click", () => {
                 selectHostel(hostel.id);
             });
@@ -303,9 +436,8 @@
             roomDropdown.disabled = true;
 
             $("availabilityMessage").textContent = selectedHostel
-                ? `No rooms are currently marked AVAILABLE at ${selectedHostel.name}.`
-                : "Select a hostel to view its available rooms.";
-
+            ? `No rooms have available beds at ${selectedHostel.name} for the selected period.`
+            : "Select a hostel to view its available rooms.";
             return;
         }
 
@@ -324,34 +456,36 @@
 
         roomDropdown.disabled = false;
 
-        $("availabilityMessage").textContent =
-            `${available.length} room${available.length === 1 ? "" : "s"} marked AVAILABLE at ${selectedHostel.name}.`;
-    }
+         $("availabilityMessage").textContent =
+        `${available.length} room${available.length === 1 ? "" : "s"} available at ${selectedHostel.name} for the selected period.`;  
+        }
 
     // -----------------------------------------------------
     // 6. SELECT ROOM AND AUTO-FILL ITS DETAILS
     // -----------------------------------------------------
 
     function selectRoom(selectedId) {
-        selectedRoom = rooms.find(room =>
-            roomId(room) === Number(selectedId) &&
-            selectedHostel &&
-            roomHostelId(room) === Number(selectedHostel.id) &&
-            roomStatus(room) === "AVAILABLE"
-        ) || null;
 
-        $("roomTypeDisplay").value = selectedRoom
-            ? roomType(selectedRoom)
-            : "";
+    selectedRoom = bookingAvailableRooms.find(room =>
+        roomId(room) === Number(selectedId) &&
+        selectedHostel &&
+        roomHostelId(room) === Number(selectedHostel.id) &&
+        roomStatus(room) === "AVAILABLE" &&
+        Number(room.remainingBeds) > 0
+    ) || null;
 
-        $("accommodationFeeDisplay").value = selectedRoom
-            ? `${money(roomFee(selectedRoom))} per month`
-            : "";
+    $("roomTypeDisplay").value = selectedRoom
+        ? roomType(selectedRoom)
+        : "";
 
-        if (currentStep === 3) {
-            fillReview();
-        }
+    $("accommodationFeeDisplay").value = selectedRoom
+        ? `${money(roomFee(selectedRoom))} per month`
+        : "";
+
+    if (currentStep === 3) {
+        fillReview();
     }
+}
 
     // -----------------------------------------------------
     // 7. VALIDATE EACH BOOKING STEP
@@ -614,6 +748,18 @@ function goToStep(step) {
         $("roomSearch")?.addEventListener("input", () => {
             renderHostels($("roomSearch").value);
         });
+
+        // Recheck room availability whenever booking dates change.
+        $("checkIn")?.addEventListener(
+        "change",
+        refreshBookingAvailability
+        );
+
+        $("stayMonths")?.addEventListener(
+        "change",
+        refreshBookingAvailability
+        );
+
     }
       
      async function submitBooking() {
