@@ -111,8 +111,8 @@ public class AdminHandler{
 
   }
 
-  public static void handleHostels(HttpExchange exchange) throws IOException {
-    
+  
+public static void handleHostels(HttpExchange exchange) throws IOException {
     if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
         ResponseUtil.send(exchange, 405, "Accepting only POST");
         return;
@@ -120,23 +120,67 @@ public class AdminHandler{
 
     InputStream input = exchange.getRequestBody();
     String body = new String(input.readAllBytes(), StandardCharsets.UTF_8);
-    
+
     Map<String, String> data = FormDataParser.parse(body);
 
     String hostelName = data.get("hostelName");
     String location = data.get("location");
     String description = data.get("description");
-   
-    SessionManager.UserSession session = SessionManager.getSession(exchange);
+    String accommodationFeeValue = data.get("accommodationFee");
+    String roomArrangement = data.get("roomArrangement");
+    
+    // Receive the maximum number of applications allowed.
+    String capacityValue = data.get("applicationCapacity");
+    SessionManager.UserSession session =
+            SessionManager.getSession(exchange);
     if (session == null || !"ADMIN".equals(session.getRole())) {
-      ResponseUtil.send(exchange, 403, "Admin access required.");
+        ResponseUtil.send(exchange, 403, "Admin access required.");
+        return;
+    }
+    // Validate application capacity.
+    int applicationCapacity;
+    try {
+        applicationCapacity = Integer.parseInt(capacityValue);
+        if (applicationCapacity < 1) {
+            ResponseUtil.send(exchange, 400,
+                    "Application capacity must be at least 1.");
+            return;
+        }
+    } catch (NumberFormatException e) {
+        ResponseUtil.send(exchange, 400,
+                "Please provide a valid application capacity.");
+        return;
+    }
+
+    BigDecimal accommodationFee;
+
+  try {
+    accommodationFee = new BigDecimal(accommodationFeeValue);
+
+    if (accommodationFee.compareTo(BigDecimal.ZERO) <= 0) {
+        ResponseUtil.send(exchange, 400,
+                "Accommodation fee must be greater than zero.");
+        return;
+    }
+
+    } catch (NumberFormatException | NullPointerException e) {
+      ResponseUtil.send(exchange, 400,
+            "Please provide a valid accommodation fee.");
       return;
     }
-    
-    boolean success = AdminService.addHostel(hostelName, location, description, session.getRole());
 
+    boolean success = AdminService.addHostel(
+            hostelName,
+            location,
+            description,
+            applicationCapacity,
+            accommodationFee,
+            roomArrangement,
+            session.getRole()
+    );
     String response;
     int statusCode;
+
     if (success) {
         response = "Hostel added successfully by an admin!";
         statusCode = 201;
@@ -144,8 +188,10 @@ public class AdminHandler{
         response = "Invalid details or hostel already exists!";
         statusCode = 409;
     }
+
     ResponseUtil.send(exchange, statusCode, response);
-  }
+}
+
 
   //Viewing Hostels
   public static void handleViewHostels(HttpExchange exchange) throws IOException {

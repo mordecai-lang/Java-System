@@ -73,6 +73,11 @@ async function loadHostels() {
         }
 
         hostels = await response.json();
+        console.log("Full response:", hostels);
+        console.log("First hostel:", hostels[0]);
+        console.log("Capacity property:", hostels[0]?.applicationCapacity);
+        console.log("Available properties:", Object.keys(hostels[0] || {}));
+
 
         renderHostels();
     } catch (error) {
@@ -89,6 +94,7 @@ async function loadHostels() {
 }
 
 // Display hostels in the table.
+
 function renderHostels() {
     const searchTerm =
         hostelSearchInput.value.trim().toLowerCase();
@@ -104,7 +110,7 @@ function renderHostels() {
     if (filteredHostels.length === 0) {
         hostelTableBody.innerHTML = `
             <tr>
-                <td colspan="5" class="empty-state">
+                <td colspan="6" class="empty-state">
                     No hostels found. Try another search or add a hostel.
                 </td>
             </tr>
@@ -126,13 +132,11 @@ function renderHostels() {
                     </td>
 
                     <td>
-                        <button
-                            type="button"
-                            class="table-action-btn"
-                            data-action="rooms"
-                            data-id="${hostel.id}">
-                            Manage Rooms
-                        </button>
+                        ${hostel.applicationCapacity}
+                    </td>
+
+                    <td>
+                        KSh ${Number(hostel.accommodationFee).toLocaleString()}
                     </td>
                 </tr>
             `)
@@ -143,6 +147,7 @@ function renderHostels() {
         `Showing ${filteredHostels.length} of ${hostels.length} hostels`;
 }
 
+
 // Reload the displayed rows whenever the search changes.
 hostelSearchInput.addEventListener("input", renderHostels);
 
@@ -151,7 +156,8 @@ loadHostels();
 
 
 
-// 5. ADD HOSTEL: SEND DATA TO THE JAVA BACKEND
+
+// 5.ADD HOSTEL: SEND DATA TO THE JAVA BACKEND
 
 const hostelForm = document.getElementById("hostelForm");
 const messagePopup = document.getElementById("messagePopup");
@@ -160,18 +166,24 @@ hostelForm.addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
-    // Get values from the hostel form
-    const hostelName = document.getElementById("hostelName").value;
-    const location = document.getElementById("hostelLocation").value;
-    const description = document.getElementById("hostelDescription").value;
+    // Get values from the hostel form.
+    const hostelName = document.getElementById("hostelName").value.trim();
+    const location = document.getElementById("hostelLocation").value.trim();
+    const description = document.getElementById("hostelDescription").value.trim();
+    const applicationCapacity = document.getElementById("applicationCapacity").value;
+    const accommodationFee = document.getElementById("accommodationFee").value;
+    const roomArrangement = document.getElementById("roomArrangement").value;
 
-    // Prepare form data for Java
+    // Prepare form data for Java.
     const data = new URLSearchParams();
 
     data.append("hostelName", hostelName);
     data.append("location", location);
-    data.append("description", description);
-
+    data.append("description", description);    
+    data.append("applicationCapacity", applicationCapacity);
+    data.append("accommodationFee", accommodationFee);
+    data.append("roomArrangement", roomArrangement);
+    
     try {
 
         const response = await fetch(
@@ -186,45 +198,54 @@ hostelForm.addEventListener("submit", async function(event) {
                 body: data
             }
         );
-        const result = await response.text(); 
+
+        const result = await response.text();
+
         console.log("Status:", response.status);
         console.log("Message:", result);
         console.log("Popup:", messagePopup);
 
-        // Put Java's response inside the popup
+        // Display Java's response.
         messagePopup.textContent = result;
 
-        // Decide popup type based on HTTP status
         if (response.ok) {
             messagePopup.classList.add("success");
             messagePopup.classList.remove("error");
 
-            // Reset only after a successful response
+            // Reset only after successful insertion.
             hostelForm.reset();
+
+            // Reload hostels to display the newly saved capacity.
+            await loadHostels();
+
         } else {
-        messagePopup.classList.add("error");
-        messagePopup.classList.remove("success");
+            messagePopup.classList.add("error");
+            messagePopup.classList.remove("success");
         }
 
-        // Show popup
         messagePopup.classList.add("show");
-        // Hide popup after 3 seconds
+
         setTimeout(function() {
-        messagePopup.classList.remove("show");
+            messagePopup.classList.remove("show");
         }, 3000);
+
     } catch (error) {
+
         messagePopup.textContent = "Could not connect to the server.";
         messagePopup.className = "message-popup error show";
+
         console.error("Error:", error);
     }
 
 });
 
 
+
 // 6. TABLE ACTIONS
-// Edit and list/unlist are frontend-only at this stage.
+// Handle hostel room management.
 
 hostelTableBody.addEventListener("click", event => {
+
     const button = event.target.closest("button[data-action]");
 
     if (!button) return;
@@ -235,46 +256,13 @@ hostelTableBody.addEventListener("click", event => {
 
     if (!hostel) return;
 
-    if (button.dataset.action === "edit") {
-        hostelIdInput.value = hostel.id;
-        hostelNameInput.value = hostel.name;
-        hostelLocationInput.value = hostel.location;
-        hostelDescriptionInput.value = hostel.description;
-        hostelStatusInput.value = hostel.status;
-
-        document.getElementById("formHeading").textContent =
-            "Edit Hostel";
-
-        document.getElementById("saveHostelBtn").innerHTML =
-            '<i data-lucide="save"></i> Save Changes';
-
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-
-        document.getElementById("hostelFormSection").scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
-    }
-
-    if (button.dataset.action === "toggle") {
-        hostel.status =
-            hostel.status === "LISTED" ? "UNLISTED" : "LISTED";
-
-        renderHostels();
-
-        showToast(
-            `${hostel.name} is now ${hostel.status.toLowerCase()} in the preview.`
-        );
-    }
-
     if (button.dataset.action === "rooms") {
         showToast(
             `Room management for "${hostel.name}" will be built on the Rooms page.`
         );
     }
 });
+
 
 // --------------------------------------------------
 // 7. OTHER FORM CONTROLS

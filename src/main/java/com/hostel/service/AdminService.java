@@ -31,20 +31,22 @@ public class AdminService {
         return AuthenticationDAO.deleteUser(email);
     }
 
-    public static boolean addHostel(
-            String name, String location, String description,
-            String currentRole) {
 
+    public static boolean addHostel(String name,String location,String description,int applicationCapacity,BigDecimal accommodationFee,String roomArrangement,String currentRole) {
         if (!"ADMIN".equals(currentRole)) {
             return false;
         }
-
-        return HostelsAndRoomsDAO.insertHostel(name, location, description);
+        if (applicationCapacity < 1) {
+             return false;
+        }
+        
+        return HostelsAndRoomsDAO.insertHostel(name,location,description,applicationCapacity,accommodationFee,roomArrangement);
     }
 
     public static List<Hostel> getLatestHostels() {
         return HostelsAndRoomsDAO.getLatestHostels();
     }
+
 
     public static boolean addRoom(
             int hostelId, String roomNumber, int totalBeds,

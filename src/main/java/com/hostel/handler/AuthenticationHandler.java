@@ -62,7 +62,7 @@ public class AuthenticationHandler {
             ResponseUtil.send(exchange, 401, "Invalid email or password!");
             return;
         }
-
+        
         // Send this user's session ID to the browser.
         SessionManager.sendSessionCookie(exchange, loginResult.getSessionId());
 

@@ -129,7 +129,43 @@
                   />
                 </div>
               </div>
+              <div class="form-group">
+                <label for="accommodationFee">
+                  Accommodation Fee (KSh/month) <span>*</span>
+                </label>
 
+                <input
+                  type="number"
+                  id="accommodationFee"
+                  name="accommodationFee"
+                  min="1"
+                  step="0.01"
+                  placeholder="e.g. 4500"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="roomArrangement">
+                  Room Arrangement <span>*</span>
+                </label>
+
+                <select id="roomArrangement" name="roomArrangement" required>
+                  <option value="">Select room arrangement</option>
+                  <option value="Single occupancy">Single occupancy</option>
+                  <option value="Two students per room">
+                    Two students per room
+                  </option>
+                  <option value="Three students per room">
+                    Three students per room
+                  </option>
+                  <option value="Four students per room">
+                    Four students per room
+                  </option>
+                  <option value="Five students per room">
+                    Five students per room
+                  </option>
+                </select>
+              </div>
               <div class="form-group">
                 <label for="hostelDescription">Description</label>
                 <textarea
@@ -141,15 +177,25 @@
               </div>
 
               <div class="form-group">
-                <label for="hostelStatus">Listing status</label>
-                <select id="hostelStatus" name="hostelStatus">
-                  <option value="LISTED">Listed — visible to users</option>
-                  <option value="UNLISTED">Unlisted — hidden from users</option>
-                </select>
-                <small
-                  >Room availability will also determine which rooms users can
-                  book.</small
-                >
+                <label for="applicationCapacity">
+                  Maximum applications allowed <span>*</span>
+                </label>
+
+                <input
+                  type="number"
+                  id="applicationCapacity"
+                  name="applicationCapacity"
+                  min="1"
+                  max="10000"
+                  step="1"
+                  placeholder="e.g. 100"
+                  required
+                />
+
+                <small>
+                  Set the maximum number of applications this hostel can accept.
+                  Each submitted application reserves one space.
+                </small>
               </div>
 
               <div class="form-actions">
@@ -189,24 +235,28 @@
               <li>
                 <span class="guide-number">2</span>
                 <div>
-                  <h4>Manage rooms</h4>
-                  <p>Add rooms with their type, fee and room status.</p>
+                  <h4>Set application capacity</h4>
+                  <p>
+                    Define the maximum number of applications each hostel can
+                    accept.
+                  </p>
                 </div>
               </li>
               <li>
                 <span class="guide-number">3</span>
                 <div>
-                  <h4>Control visibility</h4>
-                  <p>List or unlist a hostel without deleting its record.</p>
+                  <h4>Monitor applications</h4>
+                  <p>
+                    Track the number of applications received for each hostel.
+                  </p>
                 </div>
               </li>
               <li>
                 <span class="guide-number">4</span>
                 <div>
-                  <h4>Keep availability accurate</h4>
+                  <h4>Manage Pending Applications</h4>
                   <p>
-                    Users should see listed hostels and rooms available for
-                    their dates.
+                    Confirm or cancel applications that are awaiting approval.
                   </p>
                 </div>
               </li>
@@ -258,7 +308,8 @@
                   <th>Name</th>
                   <th>Location</th>
                   <th>Description</th>
-                  <th>Actions</th>
+                  <th>Applications Capacity</th>
+                  <th>Accommodation Fee</th>
                 </tr>
               </thead>
 

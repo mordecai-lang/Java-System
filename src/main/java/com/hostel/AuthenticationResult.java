@@ -12,7 +12,7 @@ public class AuthenticationResult {
     public int getUserId() {
         return userId;
     }
-
+    
     public String getRole() {
         return role;
     }

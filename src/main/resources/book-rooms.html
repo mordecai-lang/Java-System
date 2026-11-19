@@ -158,38 +158,44 @@
             </div>
 
             <!-- Room selection and automatically populated details -->
+            <!-- Selected hostel information -->
             <div
               class="booking-field-grid"
               style="margin-top: 22px; margin-bottom: 18px"
             >
               <div class="booking-field">
-                <label for="roomSelect">Available room number *</label>
-                <select id="roomSelect" required disabled>
-                  <option value="">Choose a hostel first</option>
-                </select>
+                <label for="applicationId">Application ID</label>
+                <input
+                  type="text"
+                  id="applicationId"
+                  value="Generated after application"
+                  readonly
+                  disabled
+                />
               </div>
 
               <div class="booking-field">
-                <label for="roomTypeDisplay">Room type</label>
+                <label for="roomTypeDisplay">Room arrangement</label>
                 <input
                   id="roomTypeDisplay"
                   type="text"
-                  placeholder="Selected automatically"
+                  placeholder="Select a hostel first"
                   readonly
                 />
               </div>
 
               <div class="booking-field">
-                <label for="accommodationFeeDisplay">Accommodation fee</label>
+                <label for="accommodationFeeDisplay"
+                  >Monthly accommodation fee</label
+                >
                 <input
                   id="accommodationFeeDisplay"
                   type="text"
-                  placeholder="Selected automatically"
+                  placeholder="Select a hostel first"
                   readonly
                 />
               </div>
             </div>
-
             <!-- Move-in date and length of stay remain -->
             <div class="booking-field-grid" style="margin-bottom: 18px">
               <div class="booking-field">
@@ -317,11 +323,12 @@
                   <span>Hostel</span><strong id="reviewHostel">—</strong>
                 </div>
                 <div class="review-row">
-                  <span>Room category</span
-                  ><strong id="reviewCategory">—</strong>
+                  <span>Room arrangement</span>
+                  <strong id="reviewCategory">—</strong>
                 </div>
                 <div class="review-row">
-                  <span>Selected room</span><strong id="reviewRoom">—</strong>
+                  <span>Application ID</span>
+                  <strong id="reviewRoom">Generated after submission</strong>
                 </div>
                 <div class="review-row">
                   <span>Move-in date</span><strong id="reviewDate">—</strong>

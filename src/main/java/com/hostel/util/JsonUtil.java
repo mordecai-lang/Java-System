@@ -38,27 +38,36 @@ public class JsonUtil {
         return json.toString();
     }
 
-    public static String hostelsToJson(List<Hostel> hostels) {
-        
-        StringBuilder json = new StringBuilder();
-        
-        json.append("[");
-        for (int i = 0; i < hostels.size(); i++) {
-            Hostel hostel = hostels.get(i);
-            json.append("{");
-            json.append("\"id\":").append(hostel.getId()).append(",");
-            json.append("\"name\":\"").append(escapeJson(hostel.getName())).append("\",");
-            json.append("\"location\":\"").append(escapeJson(hostel.getLocation())).append("\",");
-            json.append("\"description\":\"").append(escapeJson(hostel.getDescription())).append("\"");
+   public static String hostelsToJson(List<Hostel> hostels) {
 
-            json.append("}");
-            if (i < hostels.size() - 1) {
-                json.append(",");
-            }
+    StringBuilder json = new StringBuilder();
+
+    json.append("[");
+
+    for (int i = 0; i < hostels.size(); i++) {
+
+        Hostel hostel = hostels.get(i);
+
+        json.append("{");
+
+        json.append("\"id\":").append(hostel.getId()).append(",");
+        json.append("\"name\":\"").append(escapeJson(hostel.getName())).append("\",");
+        json.append("\"location\":\"").append(escapeJson(hostel.getLocation())).append("\",");
+        json.append("\"description\":\"").append(escapeJson(hostel.getDescription() == null ? "" : hostel.getDescription())).append("\",");
+        json.append("\"applicationCapacity\":").append(hostel.getApplicationCapacity()).append(",");
+        json.append("\"accommodationFee\":").append(hostel.getAccommodationFee() == null? "null" : hostel.getAccommodationFee().toPlainString());
+
+        json.append("}");
+
+        if (i < hostels.size() - 1) {
+            json.append(",");
         }
-        json.append("]");
-        return json.toString();
     }
+
+    json.append("]");
+
+    return json.toString();
+}
 
     
 public static String roomsToJson(List<Room> rooms) {
