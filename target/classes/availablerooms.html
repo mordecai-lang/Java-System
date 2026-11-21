@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Available Hostels | HostelBook</title>
+
+    <!-- Main application stylesheet -->
+    <link rel="stylesheet" href="availablerooms.css" />
+
+    <!-- Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Page JavaScript -->
+    <script src="availablerooms.js" defer></script>
+  </head>
+
+  <body>
+    <main class="available-hostels-page">
+      <header class="available-hostels-header">
+        <h1>Browse Available Hostels</h1>
+        <p>
+          Explore accommodation options and their remaining application spaces.
+        </p>
+      </header>
+
+      <!-- Hostel details will be inserted here by JavaScript -->
+      <section id="hostelsContainer">
+        <p>Loading available hostels...</p>
+      </section>
+
+      <!-- Booking navigation -->
+      <div class="available-hostels-footer">
+        <button
+          type="button"
+          id="goToBookingBtn"
+          onclick="window.location.href = 'http://localhost:8080/book-rooms'"
+        >
+          Go to Booking Page
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </div>
+    </main>
+  </body>
+</html>

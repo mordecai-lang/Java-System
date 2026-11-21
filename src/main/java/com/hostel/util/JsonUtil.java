@@ -56,7 +56,9 @@ public class JsonUtil {
         json.append("\"description\":\"").append(escapeJson(hostel.getDescription() == null ? "" : hostel.getDescription())).append("\",");
         json.append("\"applicationCapacity\":").append(hostel.getApplicationCapacity()).append(",");
         json.append("\"accommodationFee\":").append(hostel.getAccommodationFee() == null? "null" : hostel.getAccommodationFee().toPlainString());
-
+        json.append(",\"roomArrangement\":\"").append(escapeJson(hostel.getRoomArrangement() == null ? "" : hostel.getRoomArrangement())).append("\"");
+        json.append(",\"availableApplications\":").append(hostel.getAvailableApplications());
+        
         json.append("}");
 
         if (i < hostels.size() - 1) {
@@ -101,17 +103,19 @@ public static String roomsToJson(List<Room> rooms) {
     return json.toString();
 }
   public static String bookingsToJson(List<Booking> bookings) {
+
     StringBuilder json = new StringBuilder();
 
     json.append("[");
 
     for (int i = 0; i < bookings.size(); i++) {
+
         Booking booking = bookings.get(i);
 
         json.append("{");
 
         json.append("\"id\":").append(booking.getId()).append(",");
-        json.append("\"roomId\":").append(booking.getRoomId()).append(",");
+        json.append("\"hostelId\":").append(booking.getHostelId()).append(",");
         json.append("\"bookedUnder\":\"").append(escapeJson(booking.getBookedUnder())).append("\",");
         json.append("\"email\":\"").append(escapeJson(booking.getEmail())).append("\",");
         json.append("\"phone\":\"").append(escapeJson(booking.getPhone())).append("\",");
@@ -122,7 +126,6 @@ public static String roomsToJson(List<Room> rooms) {
         json.append("\"accommodationFee\":").append(booking.getAccommodationFee()).append(",");
         json.append("\"bookingStatus\":\"").append(escapeJson(booking.getBookingStatus())).append("\",");
         json.append("\"paymentStatus\":\"").append(escapeJson(booking.getPaymentStatus())).append("\",");
-        json.append("\"roomNumber\":\"").append(escapeJson(booking.getRoomNumber())).append("\",");
         json.append("\"hostelName\":\"").append(escapeJson(booking.getHostelName())).append("\"");
 
         json.append("}");
@@ -135,20 +138,23 @@ public static String roomsToJson(List<Room> rooms) {
     json.append("]");
 
     return json.toString();
-  }
+}
 
   
-public static String userBookingsToJson(List<UserBooking> bookings) {
+    public static String userBookingsToJson(List<UserBooking> bookings) {
+
     StringBuilder json = new StringBuilder();
+
     json.append("[");
 
     for (int i = 0; i < bookings.size(); i++) {
+
         UserBooking booking = bookings.get(i);
 
         json.append("{");
 
         json.append("\"id\":").append(booking.getId()).append(",");
-        json.append("\"roomId\":").append(booking.getRoomId()).append(",");
+        json.append("\"hostelId\":").append(booking.getHostelId()).append(",");
         json.append("\"bookedUnder\":\"").append(escapeJson(booking.getBookedUnder())).append("\",");
         json.append("\"email\":\"").append(escapeJson(booking.getEmail())).append("\",");
         json.append("\"phone\":\"").append(escapeJson(booking.getPhone())).append("\",");
@@ -159,7 +165,6 @@ public static String userBookingsToJson(List<UserBooking> bookings) {
         json.append("\"accommodationFee\":").append(booking.getAccommodationFee()).append(",");
         json.append("\"bookingStatus\":\"").append(escapeJson(booking.getBookingStatus())).append("\",");
         json.append("\"paymentStatus\":\"").append(escapeJson(booking.getPaymentStatus())).append("\",");
-        json.append("\"roomNumber\":\"").append(escapeJson(booking.getRoomNumber())).append("\",");
         json.append("\"hostelName\":\"").append(escapeJson(booking.getHostelName())).append("\"");
 
         json.append("}");
@@ -170,8 +175,9 @@ public static String userBookingsToJson(List<UserBooking> bookings) {
     }
 
     json.append("]");
+
     return json.toString();
-}
+    }
 
     public static String availableRoomsToJson(
         List<AvailableRoom> rooms) {

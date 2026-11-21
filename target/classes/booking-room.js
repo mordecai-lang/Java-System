@@ -21,7 +21,7 @@
     // Empty string means the Java backend uses the same origin.
     // If necessary, change this to "http://localhost:8080".
     const API_BASE = "";
-    const HOSTELS_ENDPOINT = `${API_BASE}/adminViewHostels`;
+    const HOSTELS_ENDPOINT = `${API_BASE}/availableApplications`;
     
     let currentStep = 1;
     let hostels = [];
@@ -248,16 +248,13 @@ function renderHostels(searchText = "") {
         // Display room arrangement.
         const roomDescription = document.createElement("span");
         roomDescription.className = "hostel-card-description";
-        roomDescription.textContent = occupantsPerRoom
-            ? `${occupantsPerRoom} occupants per room`
-            : "Room arrangement not provided";
+        roomDescription.textContent = hostel.roomArrangement
+            || "Room arrangement not provided";
 
         // Display remaining application spaces.
         const count = document.createElement("span");
         count.className = "hostel-card-count";
-        count.textContent =
-            `${availableApplications} application${availableApplications === 1 ? "" : "s"} remaining`;
-
+        count.textContent = `${availableApplications} application${availableApplications === 1 ? "" : "s"} remaining`;
         card.append(name, location, roomDescription, count);
 
         if (hostel.description) {
@@ -270,8 +267,16 @@ function renderHostels(searchText = "") {
         card.disabled = availableApplications <= 0;
 
         card.addEventListener("click", () => {
-            selectHostel(hostel.id);
-        });
+    try {
+        selectHostel(hostel.id);
+    
+    } catch (error) {
+    alert(
+        "Selection failed!\n\n" +
+        error.stack
+    );
+}
+}); 
 
         container.append(card);
     });
@@ -280,34 +285,31 @@ function renderHostels(searchText = "") {
         window.lucide.createIcons();
     }
 }
-   
+
 // -----------------------------------------------------
 // 5. SELECT HOSTEL
 // -----------------------------------------------------
 
 function selectHostel(hostelId) {
+
     selectedHostel = hostels.find(
         hostel => Number(hostel.id) === Number(hostelId)
     ) || null;
 
-    // No room is selected by the applicant.
-    selectedRoom = null;
-
-    // Store the hostel ID, not its display name.
+    // Store the selected hostel ID.
     $("hostelSelect").value = selectedHostel
         ? String(selectedHostel.id)
         : "";
 
-    // Clear old room-related information.
+    // Clear previous information.
     $("roomTypeDisplay").value = "";
     $("accommodationFeeDisplay").value = "";
-
-    // No room dropdown population is required.
-    renderHostels($("roomSearch").value);
 
     if (!selectedHostel) {
         $("availabilityMessage").textContent =
             "Please select a hostel.";
+
+        renderHostels($("roomSearch").value);
         return;
     }
 
@@ -317,14 +319,23 @@ function selectHostel(hostelId) {
     if (availableApplications <= 0) {
         $("availabilityMessage").textContent =
             `Application capacity at ${selectedHostel.name} is full.`;
+
+        renderHostels($("roomSearch").value);
         return;
     }
 
+    // Automatically populate hostel information.
+    $("roomTypeDisplay").value =
+        selectedHostel.roomArrangement || "Not specified";
+
+    $("accommodationFeeDisplay").value =
+        selectedHostel.accommodationFee ?? "";
+
     $("availabilityMessage").textContent =
         `${availableApplications} application spaces remaining at ${selectedHostel.name}.`;
+
+    renderHostels($("roomSearch").value);
 }
-
-
     // -----------------------------------------------------
     // 7. VALIDATE EACH BOOKING STEP
     // -----------------------------------------------------
@@ -406,56 +417,64 @@ if (step === 1) {
     }
 
     // -----------------------------------------------------
-    // 8. POPULATE THE REVIEW SUMMARY
-    // -----------------------------------------------------
+// 8. POPULATE THE REVIEW SUMMARY
+// -----------------------------------------------------
 
-    function fillReview() {
-        const months = Number($("stayMonths").value || 1);
-        const fee = selectedRoom ? roomFee(selectedRoom) : 0;
+function fillReview() {
 
-        const date = $("checkIn").value
-            ? new Date(`${$("checkIn").value}T00:00:00`)
-            : null;
+    const months = Number($("stayMonths").value || 1);
 
-        $("reviewHostel").textContent =
-            selectedHostel?.name || "—";
+    // Get the monthly fee from the selected hostel.
+    const fee = Number(selectedHostel?.accommodationFee || 0);
 
-        $("reviewCategory").textContent =
-            selectedRoom ? roomType(selectedRoom) : "—";
+    const date = $("checkIn").value
+        ? new Date(`${$("checkIn").value}T00:00:00`)
+        : null;
 
-        $("reviewRoom").textContent =
-            selectedRoom ? roomNumber(selectedRoom) : "—";
+    // Selected hostel
+    $("reviewHostel").textContent =
+        selectedHostel?.name || "—";
 
-        $("reviewDate").textContent = date
-            ? date.toLocaleDateString("en-KE", {
-                day: "numeric",
-                month: "short",
-                year: "numeric"
-            })
-            : "—";
+    // Hostel room arrangement (not a physical room type).
+    $("reviewCategory").textContent =
+        selectedHostel?.roomArrangement || "—";
 
-        $("reviewDuration").textContent =
-            `${months} ${months === 1 ? "month" : "months"}`;
+    // Move-in date
+    $("reviewDate").textContent = date
+        ? date.toLocaleDateString("en-KE", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        })
+        : "—";
 
-        const occupants = $("occupants").value;
+    // Length of stay
+    $("reviewDuration").textContent =
+        `${months} ${months === 1 ? "month" : "months"}`;
 
-        $("reviewOccupants").textContent = occupants
-            ? `${occupants} ${occupants === "1" ? "occupant" : "occupants"}`
-            : "—";
+    // Occupants
+    const occupants = $("occupants").value;
 
-        $("reviewName").textContent =
-            $("fullName").value.trim() || "—";
+    $("reviewOccupants").textContent = occupants
+        ? `${occupants} ${occupants === "1" ? "occupant" : "occupants"}`
+        : "—";
 
-        $("reviewContact").textContent = [
-            $("email").value.trim(),
-            $("phone").value.trim()
-        ].filter(Boolean).join(" · ") || "—";
+    // Applicant name
+    $("reviewName").textContent =
+        $("fullName").value.trim() || "—";
 
-        $("reviewTotal").textContent = money(fee * months);
+    // Contact details
+    $("reviewContact").textContent = [
+        $("email").value.trim(),
+        $("phone").value.trim()
+    ].filter(Boolean).join(" · ") || "—";
 
-        $("reviewPriceNote").textContent =
-            `${money(fee)} per month × ${months} ${months === 1 ? "month" : "months"}. Estimate only; no payment has been made.`;
-    }
+    // Total accommodation fee
+    $("reviewTotal").textContent = money(fee * months);
+
+    $("reviewPriceNote").textContent =
+        `${money(fee)} per month × ${months} ${months === 1 ? "month" : "months"}. Estimate only; no payment has been made.`;
+}
 
     
     // -----------------------------------------------------
@@ -551,7 +570,75 @@ function goToStep(step) {
     });
     }   
 
-    
+    //9.5Submint booking
+    // -----------------------------------------------------
+// SUBMIT HOSTEL APPLICATION
+// -----------------------------------------------------
+
+async function submitBooking() {
+
+    // Ensure a hostel has been selected.
+    if (!selectedHostel) {
+        alert("Please select a hostel.");
+        return;
+    }
+
+    // Collect application details.
+    const bookingData = {
+        hostelId: Number(selectedHostel.id),
+        checkInDate: $("checkIn").value,
+        stayMonths: Number($("stayMonths").value),
+        occupants: Number($("occupants").value),
+        bookedUnder: $("fullName").value.trim(),
+        email: $("email").value.trim(),
+        phone: $("phone").value.trim()
+    };
+
+    // Basic validation.
+    if (
+        !bookingData.checkInDate ||
+        !bookingData.stayMonths ||
+        !bookingData.occupants ||
+        !bookingData.bookedUnder ||
+        !bookingData.email ||
+        !bookingData.phone
+    ) {
+        alert("Please complete all application details.");
+        return;
+    }
+
+    try {
+    const data = new URLSearchParams(bookingData).toString();
+
+    const response = await fetch(
+        "http://localhost:8080/userBookRoom",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: data
+        }
+    );
+
+    const result = await response.text();
+
+    // Booking successfully created as PENDING.
+    if (response.status === 201) {
+        goToStep(4);
+        return;
+    }
+
+    // Display an error only if submission failed.
+    showToast(result || "Application submission failed.");
+
+} catch (error) {
+
+    showToast("Unable to submit your application. Please try again.");
+
+    console.error(error);
+}
+}    
 // -----------------------------------------------------
 // 10. KEEP REVIEW DATA UPDATED
 // -----------------------------------------------------
@@ -631,8 +718,8 @@ function wireReviewUpdates() {
         // Step 3 -> Submit booking -> Step 4
         if (currentStep === 3) {
 
-        if (!selectedRoom) {
-            showToast("Please select a room.");
+        if (!selectedHostel) {
+            showToast("Please select a hostel.");
             return;
         }
 

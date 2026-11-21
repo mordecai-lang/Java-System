@@ -27,8 +27,9 @@ public class Main {
         server.createContext("/userBookRoom",BookingHandler::handleBookRoom);
         server.createContext("/usersRecentBookings",BookingHandler::handleViewRecentBookings);
         server.createContext("/ActualUsersRecentBookings",BookingHandler::handleViewActualRecentBookings);
-        server.createContext("/availableBookingRooms",BookingHandler::handleAvailableBookingRooms);    
-        
+        server.createContext("/availableBookingRooms",BookingHandler::handleAvailableBookingRooms); 
+        server.createContext("/availableApplications",BookingHandler::handleAvailableApplications);
+
         server.start();
 
         System.out.println("Server running at http://localhost:8080");

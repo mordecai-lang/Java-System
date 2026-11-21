@@ -48,7 +48,9 @@ public class PageHandler {
         } else if (path.equals("/manage-booking")) {
             fileName = isAdmin ? "manage-booking.html" : "index.html";
 
-        } else {
+        }else if (path.equals("/availablerooms")) {
+            fileName = authenticated ? "availablerooms.html" : "index.html";
+        }else {
             fileName = path.substring(1);
         }
 

@@ -71,7 +71,6 @@ async function loadRecentBookings() {
 
         bookingsBody.innerHTML = recentBookings.map(booking => `
             <div class="booking-row">
-                <span>${escapeHtml(booking.roomNumber)}</span>
                 <span>${escapeHtml(booking.hostelName)}</span>
                 <span>${escapeHtml(booking.checkInDate)}</span>
                 <span>${escapeHtml(booking.checkOutDate)}</span>
@@ -121,3 +120,133 @@ function getStatusClass(status) {
 
 // Run when the dashboard loads.
 loadRecentBookings();
+
+// -----------------------------------------------------
+// LOAD MY ACTIVE BOOKINGS COUNT
+// -----------------------------------------------------
+async function loadMyBookingsCount() {
+    try {
+        const response = await fetch(
+            "http://localhost:8080/ActualUsersRecentBookings"
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const bookings = await response.json();
+
+        // Count only PENDING and CONFIRMED bookings.
+        const activeBookings = bookings.filter(booking =>
+            booking.bookingStatus === "PENDING" ||
+            booking.bookingStatus === "CONFIRMED"
+        ).length;
+
+        // Display the calculated figure.
+        document.getElementById("myBookingsCount").textContent =
+            activeBookings;
+
+    } catch (error) {
+        console.error("Unable to load active bookings:", error);
+    }
+}
+
+// Load the figure when the page is ready.
+loadMyBookingsCount();
+
+// -----------------------------------------------------
+// LOAD TOTAL AVAILABLE APPLICATIONS
+// -----------------------------------------------------
+async function loadAvailableApplicationsCount() {
+    try {
+        const response = await fetch(
+            "http://localhost:8080/availableApplications"
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const hostels = await response.json();
+
+        // Add the available applications from every hostel.
+        const totalAvailableApplications = hostels.reduce(
+            (total, hostel) => {
+                return total + (Number(hostel.availableApplications) || 0);
+            },
+            0
+        );
+
+        // Display the combined figure.
+        document.getElementById("availableApplicationsCount").textContent =
+            totalAvailableApplications;
+
+    } catch (error) {
+        console.error("Unable to load available applications:", error);
+    }
+}
+
+// Load the figure when the page is ready.
+loadAvailableApplicationsCount();
+
+// -----------------------------------------------------
+// LOAD TOTAL HOSTELS
+// -----------------------------------------------------
+async function loadTotalHostelsCount() {
+    try {
+        const response = await fetch(
+            "http://localhost:8080/adminViewHostels"
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const hostels = await response.json();
+
+        // Count all returned hostel records.
+        const totalHostels = hostels.length;
+
+        // Display the total.
+        document.getElementById("totalHostelsCount").textContent =
+            totalHostels;
+
+    } catch (error) {
+        console.error("Unable to load total hostels:", error);
+    }
+}
+
+// Load the figure.
+loadTotalHostelsCount();
+
+// -----------------------------------------------------
+// LOAD PENDING PAYMENTS COUNT
+// -----------------------------------------------------
+async function loadPendingPaymentsCount() {
+    try {
+        const response = await fetch(
+            "http://localhost:8080/ActualUsersRecentBookings"
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const bookings = await response.json();
+
+        // Count only PENDING bookings.
+        const pendingPayments = bookings.filter(booking =>
+            booking.bookingStatus === "PENDING"
+        ).length;
+
+        // Display the figure.
+        document.getElementById("pendingPaymentsCount").textContent =
+            pendingPayments;
+
+    } catch (error) {
+        console.error("Unable to load pending payments:", error);
+    }
+}
+
+// Load the figure.
+loadPendingPaymentsCount();

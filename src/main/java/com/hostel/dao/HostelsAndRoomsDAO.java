@@ -63,7 +63,7 @@ public static boolean insertHostel(String name,String location,String descriptio
   public static List<Hostel> getLatestHostels() {
     List<Hostel> hostels = new ArrayList<>();
         
-        String sql = "SELECT id, name, location, description, application_capacity, accommodation_fee FROM hostels ORDER BY id DESC LIMIT 15";
+        String sql = "SELECT id, name, location, description, application_capacity, accommodation_fee, room_arrangement FROM hostels ORDER BY id DESC LIMIT 15";
         
         try (
           Connection connection = DriverManager.getConnection(url, user, dbPassword);
@@ -71,7 +71,16 @@ public static boolean insertHostel(String name,String location,String descriptio
         ){
           ResultSet resultSet = statement.executeQuery();
           while (resultSet.next()) {
-              Hostel hostel = new Hostel(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("location"), resultSet.getString("description"), resultSet.getInt("application_capacity"),resultSet.getBigDecimal("accommodation_fee"));
+              Hostel hostel = new Hostel(
+                  resultSet.getInt("id"),
+                  resultSet.getString("name"),
+                  resultSet.getString("location"),
+                  resultSet.getString("description"),
+                  resultSet.getInt("application_capacity"),
+                  resultSet.getBigDecimal("accommodation_fee"),
+                  resultSet.getString("room_arrangement")
+                  
+              );
               hostels.add(hostel);
           }
 
@@ -80,6 +89,80 @@ public static boolean insertHostel(String name,String location,String descriptio
         }
         return hostels;
     }
+    
+    // Retrieve hostels for users page with their remaining application spaces.
+ public static List<Hostel> getAvailableApplications() {
+
+    List<Hostel> hostels = new ArrayList<>();
+
+    String sql = """
+        SELECT
+            h.id,
+            h.name,
+            h.location,
+            h.description,
+            h.application_capacity,
+            h.accommodation_fee,
+            h.room_arrangement,
+
+            GREATEST(
+                h.application_capacity - COUNT(b.id),
+                0
+            ) AS available_applications
+
+        FROM hostels h
+
+        LEFT JOIN bookings b
+            ON h.id = b.hostel_id
+            AND b.booking_status IN ('PENDING', 'CONFIRMED')
+
+        GROUP BY
+            h.id,
+            h.name,
+            h.location,
+            h.description,
+            h.application_capacity,
+            h.accommodation_fee,
+            h.room_arrangement
+
+        ORDER BY h.id DESC
+        LIMIT 15
+        """;
+
+    try (
+        Connection connection = DriverManager.getConnection(
+            url, user, dbPassword
+        );
+        PreparedStatement statement = connection.prepareStatement(sql);
+        ResultSet resultSet = statement.executeQuery()
+    ) {
+
+        while (resultSet.next()) {
+
+            Hostel hostel = new Hostel(
+                resultSet.getInt("id"),
+                resultSet.getString("name"),
+                resultSet.getString("location"),
+                resultSet.getString("description"),
+                resultSet.getInt("application_capacity"),
+                resultSet.getBigDecimal("accommodation_fee"),
+                resultSet.getString("room_arrangement"),
+                resultSet.getInt("available_applications")
+            );
+
+          
+
+            hostels.add(hostel);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return hostels;
+    }
+
+    
   //Add room data to the database
   public static boolean insertRoom(int hostelId,String roomNumber,int totalBeds,String roomType, BigDecimal accommodationFee,String status) {
 
@@ -135,16 +218,15 @@ public static boolean insertHostel(String name,String location,String descriptio
   }
 
 
-                 
-  //View rooms from the database
-  public static List<Booking> getLatestBookings() {
+   // Admin views recent bookings from the database.
+    public static List<Booking> getLatestBookings() {
 
     List<Booking> bookings = new ArrayList<>();
 
     String sql = """
         SELECT
             b.id,
-            b.room_id,
+            b.hostel_id,
             b.booked_under,
             b.email,
             b.phone,
@@ -155,25 +237,24 @@ public static boolean insertHostel(String name,String location,String descriptio
             b.accommodation_fee,
             b.booking_status,
             b.payment_status,
-            r.room_number,
             h.name AS hostel_name
         FROM bookings b
-        JOIN rooms r ON b.room_id = r.id
-        JOIN hostels h ON r.hostel_id = h.id
+        JOIN hostels h ON b.hostel_id = h.id
         ORDER BY b.created_at DESC, b.id DESC
         LIMIT 5
         """;
 
-    try  (
+    try (
         Connection connection = DriverManager.getConnection(url, user, dbPassword);
-        PreparedStatement statement = connection.prepareStatement(sql)
+        PreparedStatement statement = connection.prepareStatement(sql);
+        ResultSet resultSet = statement.executeQuery()
     ) {
-         ResultSet resultSet = statement.executeQuery(); 
+
         while (resultSet.next()) {
 
             Booking booking = new Booking(
                 resultSet.getInt("id"),
-                resultSet.getInt("room_id"),
+                resultSet.getInt("hostel_id"),
                 resultSet.getString("booked_under"),
                 resultSet.getDate("check_in_date").toLocalDate(),
                 resultSet.getDate("check_out_date").toLocalDate(),
@@ -184,7 +265,6 @@ public static boolean insertHostel(String name,String location,String descriptio
                 resultSet.getString("payment_status"),
                 resultSet.getString("email"),
                 resultSet.getString("phone"),
-                resultSet.getString("room_number"),
                 resultSet.getString("hostel_name")
             );
 
@@ -196,17 +276,16 @@ public static boolean insertHostel(String name,String location,String descriptio
     }
 
     return bookings;
-  }
-
-  //Users View rooms from the database
-  // Users view their own recent bookings
+}              
+  
+    // Users view their own recent bookings.
     public static List<UserBooking> getLatestUserBookings(int userId) {
-        List<UserBooking> userBookings = new ArrayList<>();
+    List<UserBooking> userBookings = new ArrayList<>();
 
-        String sql = """
+    String sql = """
         SELECT
             b.id,
-            b.room_id,
+            b.hostel_id,
             b.booked_under,
             b.email,
             b.phone,
@@ -217,39 +296,41 @@ public static boolean insertHostel(String name,String location,String descriptio
             b.accommodation_fee,
             b.booking_status,
             b.payment_status,
-            r.room_number,
             h.name AS hostel_name
         FROM bookings b
-        JOIN rooms r ON b.room_id = r.id
-        JOIN hostels h ON r.hostel_id = h.id
+        JOIN hostels h ON b.hostel_id = h.id
         WHERE b.user_id = ?
         ORDER BY b.created_at DESC, b.id DESC
         LIMIT 5
         """;
 
-        try (
-            Connection connection = DriverManager.getConnection(url, user, dbPassword);
-            PreparedStatement statement = connection.prepareStatement(sql)
+    try (
+        Connection connection = DriverManager.getConnection(url, user, dbPassword);
+        PreparedStatement statement = connection.prepareStatement(sql)
     ) {
+
         statement.setInt(1, userId);
+
         try (ResultSet resultSet = statement.executeQuery()) {
+
             while (resultSet.next()) {
-            UserBooking userBooking = new UserBooking(
-                resultSet.getInt("id"),
-                resultSet.getInt("room_id"),
-                resultSet.getString("booked_under"),
-                resultSet.getDate("check_in_date").toLocalDate(),
-                resultSet.getDate("check_out_date").toLocalDate(),
-                resultSet.getInt("stay_months"),
-                resultSet.getInt("occupants"),
-                resultSet.getBigDecimal("accommodation_fee"),
-                resultSet.getString("booking_status"),
-                resultSet.getString("payment_status"),
-                resultSet.getString("email"),
-                resultSet.getString("phone"),
-                resultSet.getString("room_number"),
-                resultSet.getString("hostel_name")
-            );
+
+                UserBooking userBooking = new UserBooking(
+                    resultSet.getInt("id"),
+                    resultSet.getInt("hostel_id"),
+                    resultSet.getString("booked_under"),
+                    resultSet.getDate("check_in_date").toLocalDate(),
+                    resultSet.getDate("check_out_date").toLocalDate(),
+                    resultSet.getInt("stay_months"),
+                    resultSet.getInt("occupants"),
+                    resultSet.getBigDecimal("accommodation_fee"),
+                    resultSet.getString("booking_status"),
+                    resultSet.getString("payment_status"),
+                    resultSet.getString("email"),
+                    resultSet.getString("phone"),
+                    resultSet.getString("hostel_name")
+                );
+
                 userBookings.add(userBooking);
             }
         }
@@ -259,7 +340,7 @@ public static boolean insertHostel(String name,String location,String descriptio
     }
 
     return userBookings;
-    }
+}
 
     public static List<AvailableRoom> getAvailableBookingRooms(
         LocalDate checkInDate,

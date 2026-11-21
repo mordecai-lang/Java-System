@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.sql.Date;
 import java.sql.Statement;
 import java.time.LocalDate;
-
+import com.hostel.model.Hostel;
 import java.time.LocalDate;
 import java.util.List;
 import com.hostel.model.AvailableRoom;
@@ -28,220 +28,238 @@ public class BookingService {
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "John3:16";
 
-    public enum BookingResult {
-        CREATED,
-        ROOM_UNAVAILABLE,
-        INVALID_ROOM
-    }
-
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
                 DB_URL, DB_USER, DB_PASSWORD
         );
     }
 
-    public static BookingResult createBooking(
-        int userId,
-        String role,
-        int roomId,
-        LocalDate checkInDate,
-        int stayMonths,
-        int occupants,
-        String bookedUnder,
-        String email,
-        String phone
-        ) throws SQLException {
+    
+    
+    public enum BookingResult {
+    CREATED,
+    HOSTEL_UNAVAILABLE,
+    INVALID_HOSTEL
+}
 
-        if (userId <= 0) {
-            throw new SecurityException("Login is required to book a room.");
-        }
-        if (role == null || role.isBlank()) {
-            throw new SecurityException("Unable to verify the user's role.");
-        }
+public static BookingResult createBooking(
+    int userId,
+    String role,
+    int hostelId,
+    LocalDate checkInDate,
+    int stayMonths,
+    int occupants,
+    String bookedUnder,
+    String email,
+    String phone
+) throws SQLException {
 
-        // If only ordinary users may book, uncomment and adapt this check
-        // to match the exact role names stored by your application.
-        //
-        // if (!"USER".equalsIgnoreCase(role)) {
-        //     throw new SecurityException("Only users can book rooms.");
-        // }
+    // 1. Validate the user session.
+    if (userId <= 0) {
+        throw new SecurityException("Login is required to apply.");
+    }
 
-        // 2. Validate values again in the service.
-        // Never rely only on validation in JavaScript or the handler.
-        if (roomId <= 0
-                || checkInDate == null
-                || stayMonths < 1
-                || stayMonths > 12
-                || occupants < 1
-                || isBlank(bookedUnder)
-                || isBlank(email)
-                || isBlank(phone)) {
-            throw new IllegalArgumentException(
-                    "One or more booking details are invalid."
-            );
-        }
+    if (role == null || role.isBlank()) {
+        throw new SecurityException("Unable to verify the user's role.");
+    }
 
-        if (checkInDate.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException(
-                    "Check-in date cannot be in the past."
-            );
-        }
+    // 2. Validate submitted application details.
+    if (hostelId <= 0
+            || checkInDate == null
+            || stayMonths < 1
+            || stayMonths > 12
+            || occupants < 1
+            || isBlank(bookedUnder)
+            || isBlank(email)
+            || isBlank(phone)) {
 
-        final LocalDate checkOutDate;
+        throw new IllegalArgumentException(
+            "One or more application details are invalid."
+        );
+    }
+
+    if (checkInDate.isBefore(LocalDate.now())) {
+        throw new IllegalArgumentException(
+            "Check-in date cannot be in the past."
+        );
+    }
+
+    // 3. Calculate checkout date.
+    final LocalDate checkOutDate;
+
+    try {
+        checkOutDate = checkInDate.plusMonths(stayMonths);
+    } catch (RuntimeException e) {
+        throw new IllegalArgumentException(
+            "Unable to calculate the checkout date.", e
+        );
+    }
+
+    if (!checkInDate.isBefore(checkOutDate)) {
+        throw new IllegalArgumentException(
+            "Checkout date must be after check-in date."
+        );
+    }
+
+    // 4. Start database transaction.
+    try (Connection conn = getConnection()) {
+
+        conn.setAutoCommit(false);
 
         try {
-            checkOutDate = checkInDate.plusMonths(stayMonths);
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException(
-                    "Unable to calculate the checkout date.", e
-            );
-        }
 
-        if (!checkInDate.isBefore(checkOutDate)) {
-            throw new IllegalArgumentException(
-                    "Checkout date must be after check-in date."
-            );
-        }
+            int applicationCapacity;
+            BigDecimal monthlyFee;
 
-        // 3. Start a transaction.
-        try (Connection conn = getConnection()) {
+            /*
+             * 5. Retrieve and lock the selected hostel.
+             * The lock prevents simultaneous applications from
+             * exceeding the hostel's application capacity.
+             */
+            String hostelSql = """
+                SELECT
+                    application_capacity,
+                    accommodation_fee
+                FROM hostels
+                WHERE id = ?
+                FOR UPDATE
+                """;
 
-            conn.setAutoCommit(false);
+            try (PreparedStatement ps =
+                    conn.prepareStatement(hostelSql)) {
 
-            try {
-                int totalBeds;
-                BigDecimal monthlyFee;
-                String roomStatus;
+                ps.setInt(1, hostelId);
 
-                /*
-                 * Lock this room's row until the transaction finishes.
-                 * Other booking transactions for the same room must wait.
-                 */
-                String roomSql = "SELECT total_beds, accommodation_fee, status " +
-                                 "FROM rooms " +
-                                 "WHERE id = ? " +
-                                 "FOR UPDATE";
-                try (PreparedStatement ps =
-                             conn.prepareStatement(roomSql)) {
+                try (ResultSet rs = ps.executeQuery()) {
 
-                    ps.setInt(1, roomId);
-
-                    try (ResultSet rs = ps.executeQuery()) {
-
-                        if (!rs.next()) {
-                            conn.rollback();
-                            return BookingResult.INVALID_ROOM;
-                        }
-
-                        totalBeds = rs.getInt("total_beds");
-                        monthlyFee = rs.getBigDecimal("accommodation_fee");
-                        roomStatus = rs.getString("status");
-                    }
-                }
-
-                // 4. The room must be operationally available.
-                if (!"AVAILABLE".equalsIgnoreCase(roomStatus)
-                        || totalBeds <= 0
-                        || monthlyFee == null
-                        || monthlyFee.signum() < 0) {
-
-                    conn.rollback();
-                    return BookingResult.ROOM_UNAVAILABLE;
-                }
-
-                /*
-                 * 5. Count beds reserved by overlapping bookings.
-                 *
-                 * Two stays overlap when:
-                 * existing check-in < proposed checkout
-                 * AND existing checkout > proposed check-in.
-                 *
-                 * PENDING bookings also reserve beds in this design.
-                 */
-                String capacitySql ="SELECT COALESCE(SUM(occupants), 0) AS reserved_beds " +
-                                    "FROM bookings " +
-                                     "WHERE room_id = ? " +
-                                    "AND booking_status IN ('PENDING', 'CONFIRMED') " +
-                                    "AND check_in_date < ? " +
-                                     "AND check_out_date > ?";
-
-                int reservedBeds;
-
-                try (PreparedStatement ps =
-                             conn.prepareStatement(capacitySql)) {
-
-                    ps.setInt(1, roomId);
-                    ps.setDate(2, Date.valueOf(checkOutDate));
-                    ps.setDate(3, Date.valueOf(checkInDate));
-
-                    try (ResultSet rs = ps.executeQuery()) {
-                        rs.next();
-                        reservedBeds = rs.getInt("reserved_beds");
-                    }
-                }
-
-                int availableBeds = totalBeds - reservedBeds;
-
-                // 6. Reject the booking if there are not enough beds.
-                if (availableBeds < occupants) {
-                    conn.rollback();
-                    return BookingResult.ROOM_UNAVAILABLE;
-                }
-
-                // 7. Calculate the total from the database's monthly fee.
-                BigDecimal totalFee =
-                        monthlyFee.multiply(BigDecimal.valueOf(stayMonths));
-
-                /*
-                 * 8. Insert the booking.
-                 * Payment has NOT been made at this stage.
-                 */
-                String insertSql = "INSERT INTO bookings (" +
-        "user_id, room_id, booked_under, email, phone, " +
-        "check_in_date, check_out_date, stay_months, " +
-        "occupants, accommodation_fee, booking_status, payment_status" +
-        ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'PENDING')";
-
-                try (PreparedStatement ps =
-                             conn.prepareStatement(
-                                     insertSql,
-                                     Statement.RETURN_GENERATED_KEYS
-                             )) {
-
-                    ps.setInt(1, userId);
-                    ps.setInt(2, roomId);
-                    ps.setString(3, bookedUnder.trim());
-                    ps.setString(4, email.trim());
-                    ps.setString(5, phone.trim());
-                    ps.setDate(6, Date.valueOf(checkInDate));
-                    ps.setDate(7, Date.valueOf(checkOutDate));
-                    ps.setInt(8, stayMonths);
-                    ps.setInt(9, occupants);
-                    ps.setBigDecimal(10, totalFee);
-
-                    int rowsInserted = ps.executeUpdate();
-
-                    if (rowsInserted != 1) {
+                    if (!rs.next()) {
                         conn.rollback();
-                        throw new SQLException(
-                                "The booking was not inserted."
-                        );
+                        return BookingResult.INVALID_HOSTEL;
                     }
+
+                    applicationCapacity =
+                        rs.getInt("application_capacity");
+
+                    monthlyFee =
+                        rs.getBigDecimal("accommodation_fee");
                 }
-
-                // 9. Commit only after the insert succeeds.
-                conn.commit();
-
-                return BookingResult.CREATED;
-
-            } catch (SQLException | RuntimeException e) {
-                conn.rollback();
-                throw e;
-            } finally {
-                conn.setAutoCommit(true);
             }
+
+            // 6. Validate hostel capacity and accommodation fee.
+            if (applicationCapacity <= 0
+                    || monthlyFee == null
+                    || monthlyFee.signum() < 0) {
+
+                conn.rollback();
+                return BookingResult.HOSTEL_UNAVAILABLE;
+            }
+
+            /*
+             * 7. Count applications already consuming capacity.
+             *
+             * PENDING and CONFIRMED consume application spaces.
+             * CANCELLED and COMPLETED do not.
+             */
+            String capacitySql = """
+                SELECT COUNT(*) AS occupied_applications
+                FROM bookings
+                WHERE hostel_id = ?
+                AND booking_status IN ('PENDING', 'CONFIRMED')
+                """;
+
+            int occupiedApplications;
+
+            try (PreparedStatement ps =
+                    conn.prepareStatement(capacitySql)) {
+
+                ps.setInt(1, hostelId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    rs.next();
+
+                    occupiedApplications =
+                        rs.getInt("occupied_applications");
+                }
+            }
+
+            // 8. Check whether an application space remains.
+            int availableApplications =
+                applicationCapacity - occupiedApplications;
+
+            if (availableApplications <= 0) {
+                conn.rollback();
+                return BookingResult.HOSTEL_UNAVAILABLE;
+            }
+
+            // 9. Calculate the total accommodation fee.
+            BigDecimal totalFee =
+                monthlyFee.multiply(
+                    BigDecimal.valueOf(stayMonths)
+                );
+
+            /*
+             * 10. Insert the application.
+             * Payment has NOT been made at this stage.
+             */
+            String insertSql = """
+                INSERT INTO bookings (
+                    user_id,
+                    hostel_id,
+                    booked_under,
+                    email,
+                    phone,
+                    check_in_date,
+                    check_out_date,
+                    stay_months,
+                    occupants,
+                    accommodation_fee,
+                    booking_status,
+                    payment_status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'PENDING')
+                """;
+
+            try (PreparedStatement ps =
+                    conn.prepareStatement(insertSql)) {
+
+                ps.setInt(1, userId);
+                ps.setInt(2, hostelId);
+                ps.setString(3, bookedUnder.trim());
+                ps.setString(4, email.trim());
+                ps.setString(5, phone.trim());
+                ps.setDate(6, Date.valueOf(checkInDate));
+                ps.setDate(7, Date.valueOf(checkOutDate));
+                ps.setInt(8, stayMonths);
+                ps.setInt(9, occupants);
+                ps.setBigDecimal(10, totalFee);
+
+                int rowsInserted = ps.executeUpdate();
+
+                if (rowsInserted != 1) {
+                    conn.rollback();
+
+                    throw new SQLException(
+                        "The application was not inserted."
+                    );
+                }
+            }
+
+            // 11. Commit only after successful insertion.
+            conn.commit();
+
+            return BookingResult.CREATED;
+
+        } catch (SQLException | RuntimeException e) {
+
+            conn.rollback();
+            throw e;
+
+        } finally {
+
+            conn.setAutoCommit(true);
         }
     }
+}
 
     private static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
@@ -260,7 +278,10 @@ public class BookingService {
 
     public static List<AvailableRoom> getAvailableBookingRooms(LocalDate checkInDate,LocalDate checkOutDate) {
     return HostelsAndRoomsDAO.getAvailableBookingRooms(checkInDate,checkOutDate);
-    
+    }
+
+    public static List<Hostel> getAvailableApplications() {
+        return HostelsAndRoomsDAO.getAvailableApplications();
     }
 
 }

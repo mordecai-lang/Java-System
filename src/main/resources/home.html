@@ -135,7 +135,11 @@
               comfortable stay.
             </p>
 
-            <button class="primary-button">Browse Available Rooms →</button>
+            <button class="primary-button"
+                     type="button"
+                     onclick="window.location.href='http://localhost:8080/availablerooms'">
+                      Browse Available Rooms →
+            </button>
           </div>
         </div>
 
@@ -144,16 +148,15 @@
 
   <div class="stat-card">
     <div class="card-icon">
-      <i data-lucide="bed-double"></i>
+        <i data-lucide="bed-double"></i>
     </div>
 
     <div class="stat-content">
-      <p>Total Rooms</p>
-      <h3>24</h3>
-      <span>Available for booking</span>
+        <p>Available Applications</p>
+        <h3 id="availableApplicationsCount">0</h3>
+        <span>Across all hostels</span>
     </div>
-  </div>
-
+</div>
 
   <div class="stat-card">
     <div class="card-icon">
@@ -161,9 +164,9 @@
     </div>
 
     <div class="stat-content">
-      <p>My Bookings</p>
-      <h3>2</h3>
-      <span>Active bookings</span>
+    <p>My Bookings</p>
+    <h3 id="myBookingsCount">0</h3>
+    <span>Active bookings</span>
     </div>
     
   </div>
@@ -171,29 +174,28 @@
 
   <div class="stat-card">
     <div class="card-icon">
-      <i data-lucide="building-2"></i>
+        <i data-lucide="building-2"></i>
     </div>
 
     <div class="stat-content">
-      <p>Hostels</p>
-      <h3>3</h3>
-      <span>Across campus</span>
+        <p>Hostels</p>
+        <h3 id="totalHostelsCount">0</h3>
+        <span>Across campus</span>
     </div>
-
-   
   </div>
 
 
   <div class="stat-card">
     <div class="card-icon">
-      <i data-lucide="credit-card"></i>
+        <i data-lucide="credit-card"></i>
     </div>
 
     <div class="stat-content">
-      <p>Pending Payments</p>
-      <h3>1</h3>
-      <span>Awaiting confirmation</span>
+        <p>Pending Payments</p>
+        <h3 id="pendingPaymentsCount">0</h3>
+        <span>Awaiting confirmation</span>
     </div>
+</div>
 
     
   </div>
@@ -205,19 +207,7 @@
 
 <div class="quick-grid">
 
-  <div class="quick-card">
-    <div class="quick-icon">
-      <i data-lucide="bed-double"></i>
-    </div>
-
-    <h3>View Rooms</h3>
-
-    <p>Explore available rooms and their details</p>
-
-    <span class="quick-arrow">
-      <i data-lucide="arrow-right"></i>
-    </span>
-  </div>
+  
 
   <div class="quick-card">
     <div class="quick-icon">
@@ -234,19 +224,19 @@
   </div>
 
 
-  <div class="quick-card">
+  <div class="quick-card" onclick="window.location.href='pending-payments.html'">
     <div class="quick-icon">
-      <i data-lucide="calendar-check"></i>
+        <i data-lucide="credit-card"></i>
     </div>
 
-    <h3>View My Bookings</h3>
+    <h3>Complete Payment</h3>
 
-    <p>Check your current and past bookings</p>
+    <p>View pending bookings and complete your payments</p>
 
     <span class="quick-arrow">
-      <i data-lucide="arrow-right"></i>
+        <i data-lucide="arrow-right"></i>
     </span>
-  </div>
+</div>
 
 </div>
   
@@ -265,7 +255,6 @@
 <div class="booking-table-scroll">
     <div class="booking-table">
         <div class="table-header">
-            <span>Room</span>
             <span>Hostel</span>
             <span>Check-in</span>
             <span>Check-out</span>

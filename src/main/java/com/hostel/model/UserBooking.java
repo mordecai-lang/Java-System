@@ -4,8 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class UserBooking {
+
     private int id;
-    private int roomId;
+    private int hostelId;
     private String bookedUnder;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
@@ -17,13 +18,26 @@ public class UserBooking {
     private String email;
     private String phone;
 
-    // Display fields obtained by joining rooms and hostels
-    private String roomNumber;
+    // Display field obtained by joining hostels.
     private String hostelName;
 
-    public UserBooking(int id,int roomId,String bookedUnder,LocalDate checkInDate,LocalDate checkOutDate,int stayMonths,int occupants,BigDecimal accommodationFee,String bookingStatus,String paymentStatus,String email,String phone,String roomNumber,String hostelName) {
+    public UserBooking(
+        int id,
+        int hostelId,
+        String bookedUnder,
+        LocalDate checkInDate,
+        LocalDate checkOutDate,
+        int stayMonths,
+        int occupants,
+        BigDecimal accommodationFee,
+        String bookingStatus,
+        String paymentStatus,
+        String email,
+        String phone,
+        String hostelName
+    ) {
         this.id = id;
-        this.roomId = roomId;
+        this.hostelId = hostelId;
         this.bookedUnder = bookedUnder;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
@@ -34,12 +48,15 @@ public class UserBooking {
         this.paymentStatus = paymentStatus;
         this.email = email;
         this.phone = phone;
-        this.roomNumber = roomNumber;
         this.hostelName = hostelName;
     }
 
-    public int getRoomId() {
-        return roomId;
+    public int getId() {
+        return id;
+    }
+
+    public int getHostelId() {
+        return hostelId;
     }
 
     public String getBookedUnder() {
@@ -82,15 +99,7 @@ public class UserBooking {
         return phone;
     }
 
-    public String getRoomNumber() {
-        return roomNumber;
-    }
-
     public String getHostelName() {
         return hostelName;
-    }
-
-    public int getId() {
-      return id;
     }
 }

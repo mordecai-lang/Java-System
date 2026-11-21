@@ -36,7 +36,6 @@ async function loadRecentBookings() {
 
         bookingsBody.innerHTML = recentBookings.map(booking => `
             <div class="admin-booking-row">
-                <span>${escapeHtml(booking.roomNumber)}</span>
                 <span>${escapeHtml(booking.hostelName)}</span>
                 <span>${escapeHtml(booking.checkInDate)}</span>
                 <span>${escapeHtml(booking.checkOutDate)}</span>

@@ -1,0 +1,248 @@
+
+/* =========================================
+   1. GLOBAL STYLES
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f2f6fc;
+    color: #243653;
+    min-height: 100vh;
+}
+
+button {
+    font-family: inherit;
+}
+
+
+/* =========================================
+   2. MAIN PAGE CONTAINER
+========================================= */
+
+.available-hostels-page {
+    width: min(1150px, 92%);
+    margin: 0 auto;
+    padding: 45px 0 55px;
+}
+
+
+/* =========================================
+   3. PAGE HEADER
+========================================= */
+
+.available-hostels-header {
+    margin-bottom: 32px;
+}
+
+.available-hostels-header h1 {
+    font-size: 29px;
+    font-weight: 750;
+    color: #020f20;
+    letter-spacing: -0.7px;
+    margin-bottom: 9px;
+}
+
+.available-hostels-header p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #030c1c;
+}
+
+
+/* =========================================
+   4. HOSTEL LIST CONTAINER
+========================================= */
+
+#hostelsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+
+/* =========================================
+   5. INDIVIDUAL HOSTEL CARD
+========================================= */
+
+.available-hostel-card {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #e1e9f5;
+    border-radius: 17px;
+    padding: 25px 28px;
+    box-shadow: 0 5px 18px rgba(29, 66, 112, 0.055);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.available-hostel-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(29, 66, 112, 0.10);
+}
+
+
+/* =========================================
+   6. HOSTEL NAME
+========================================= */
+
+.available-hostel-card h2 {
+    font-size: 21px;
+    font-weight: 750;
+    color: #070731;
+    margin-bottom: 17px;
+}
+
+
+/* =========================================
+   7. HOSTEL DETAILS
+========================================= */
+
+.available-hostel-card p {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #132375;
+    margin-bottom: 9px;
+}
+
+.available-hostel-card p:nth-of-type(1) {
+    color: #132375;
+    font-weight: 600;
+}
+
+
+/* =========================================
+   8. APPLICATION AVAILABILITY
+========================================= */
+
+.available-hostel-card p:nth-last-of-type(2) {
+    display: inline-flex;
+    align-items: center;
+    background: #d0d1ed;
+    color: #221fbf;
+    border: 1px solid #8fadcf;
+    padding: 9px 13px;
+    border-radius: 8px;
+    font-weight: 700;
+    margin-top: 12px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+
+/* =========================================
+   9. APPLICATION STATUS
+========================================= */
+
+.available-hostel-card .status-available,
+.available-hostel-card .status-full {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 13px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 12px;
+    margin-bottom: 0;
+}
+
+/* Applications available */
+
+.available-hostel-card .status-available {
+    background: #e8f7ef;
+    color: #16804a;
+    border: 1px solid #d6f0e1;
+}
+
+/* Application capacity full */
+
+.available-hostel-card .status-full {
+    background: #fff0e6;
+    color: #dc2626;
+    border: 1px solid #fed7aa;
+}
+
+
+/* =========================================
+   10. BOOKING PAGE BUTTON
+========================================= */
+
+.available-hostels-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 35px;
+}
+
+#goToBookingBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    min-width: 230px;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 10px;
+    background: #c6cef4;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 13px rgba(16, 32, 138, 0.2);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+#goToBookingBtn:hover {
+    background:  rgb(10, 10, 85);
+    transform: translateY(-2px);
+}
+
+#goToBookingBtn:active {
+    transform: translateY(0);
+}
+
+#goToBookingBtn i {
+    width: 17px;
+    height: 17px;
+}
+
+
+/* =========================================
+   11. RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 650px) {
+
+    .available-hostels-page {
+        width: 92%;
+        padding: 28px 0 40px;
+    }
+
+    .available-hostels-header h1 {
+        font-size: 24px;
+    }
+
+    .available-hostels-header p {
+        font-size: 13px;
+    }
+
+    .available-hostel-card {
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .available-hostel-card h2 {
+        font-size: 19px;
+    }
+
+    .available-hostel-card p {
+        font-size: 13px;
+    }
+
+    #goToBookingBtn {
+        width: 100%;
+    }
+}
